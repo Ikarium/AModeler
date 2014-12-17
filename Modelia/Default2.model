@@ -1,0 +1,42 @@
+Name Root
+Elements
+{
+    Element Variable
+    {
+        Name Var1
+        Type Type
+        {
+            Vectorized false
+            Class Class
+            {
+                Name T
+                Properties
+                {
+                    Property
+                    {
+                        Name y
+                        BaseType 1
+                    }
+                    Property
+                    {
+                        Name x
+                        BaseType 1
+                    }
+                }
+            }
+        }
+        View View
+        {
+            Pos
+            {
+                x 0
+                y 0
+            }
+            Size
+            {
+                width 100
+                height 100
+            }
+        }
+    }
+}

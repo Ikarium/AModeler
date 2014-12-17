@@ -1,0 +1,207 @@
+Name Root
+IterationCount 5
+Elements
+{
+    Element CodeFunction
+    {
+        Name Codefunction
+        Outputs
+        {
+            Slot Slot
+            {
+                Name y
+                Pos 0
+                SlotType Output
+                Type Type
+                {
+                    Vectorized false
+                    Class Class
+                    {
+                        Name T
+                        Properties
+                        {
+                            Property
+                            {
+                                Name simpleType
+                                BaseType 1
+                            }
+                        }
+                    }
+                }
+                View ""
+            }
+        }
+        Code "file = open('input.txt', 'r')\nlines = file.readlines()\ny = int(lines[iteration])\n\n    "
+        View View
+        {
+            Pos
+            {
+                x -816
+                y -169
+            }
+            Size
+            {
+                width 100
+                height 100
+            }
+        }
+    }
+    Element CodeFunction
+    {
+        Name Codefunction2
+        Inputs
+        {
+            Slot Slot
+            {
+                Name x
+                Pos 0
+                SlotType Input
+                Type Type
+                {
+                    Vectorized false
+                    Class Class
+                    {
+                        Name T
+                        Properties
+                        {
+                            Property
+                            {
+                                Name simpleType
+                                BaseType 1
+                            }
+                        }
+                    }
+                }
+                View ""
+            }
+        }
+        Outputs
+        {
+            Slot Slot
+            {
+                Name y
+                Pos 0
+                SlotType Output
+                Type Type
+                {
+                    Vectorized false
+                    Class Class
+                    {
+                        Name T
+                        Properties
+                        {
+                            Property
+                            {
+                                Name simpleType
+                                BaseType 1
+                            }
+                        }
+                    }
+                }
+                View ""
+            }
+        }
+        Code "y = x*x"
+        View View
+        {
+            Pos
+            {
+                x -631
+                y -175
+            }
+            Size
+            {
+                width 100
+                height 100
+            }
+        }
+    }
+    Element CodeFunction
+    {
+        Name Codefunction3
+        Inputs
+        {
+            Slot Slot
+            {
+                Name x
+                Pos 0
+                SlotType Input
+                Type Type
+                {
+                    Vectorized false
+                    Class Class
+                    {
+                        Name T
+                        Properties
+                        {
+                            Property
+                            {
+                                Name simpleType
+                                BaseType 1
+                            }
+                        }
+                    }
+                }
+                View ""
+            }
+        }
+        Code "if(iteration == 0):\n  os.remove(\"output.txt\")\nfile = open(\"output.txt\", \"a\")\nfile.write(str(x) + \"\\n\")"
+        View View
+        {
+            Pos
+            {
+                x -413
+                y -170
+            }
+            Size
+            {
+                width 100
+                height 100
+            }
+        }
+    }
+}
+Links
+{
+    Link Link
+    {
+        Slot1
+        {
+            ComponentName Codefunction
+            SlotName y
+        }
+        Slot2
+        {
+            ComponentName Codefunction2
+            SlotName x
+        }
+        View ""
+    }
+    Link Link
+    {
+        Slot1
+        {
+            ComponentName Codefunction2
+            SlotName y
+        }
+        Slot2
+        {
+            ComponentName Codefunction3
+            SlotName x
+        }
+        View ""
+    }
+}
+View View
+{
+    Pos
+    {
+        x 0
+        y 0
+    }
+    Size
+    {
+        width 100
+        height 100
+    }
+}

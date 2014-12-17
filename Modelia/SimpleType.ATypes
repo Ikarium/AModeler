@@ -1,0 +1,13 @@
+Vectorized false
+Class Class
+{
+	Name T
+	Properties
+	{
+		Property
+		{
+			Name simpleType
+			BaseType 1
+		}
+	}
+}
