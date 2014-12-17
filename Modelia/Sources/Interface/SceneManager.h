@@ -44,7 +44,7 @@ protected:
 protected slots:
 	void focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason);
 	void navBarElemTriggered(); 
-	  
+	 
 private:
 	class Impl;
 	UniquePtr<Impl> m;
