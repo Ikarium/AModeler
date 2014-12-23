@@ -17,11 +17,41 @@
 namespace Interface
 {
 
-CompositionView::CompositionView(Model::Composition * _model, PropertyTree & ptree) 
-	: ProcessView(static_cast<Model::Process*>(_model), ptree),
-	model_(_model)
+class CompositionView::Impl
+{
+
+	CompositionView* w;
+
+public:
+
+	Model::Composition * model;
+
+	Impl(CompositionView *, Model::Composition *);
+	~Impl();
+
+};
+
+CompositionView::Impl::Impl(CompositionView* owner, Model::Composition * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+CompositionView::Impl::~Impl()
+{
+
+}
+
+CompositionView::CompositionView(Model::Composition * model, PropertyTree & ptree)
+	: m(new Impl(this, model)), ProcessView(static_cast<Model::Process*>(model), ptree)
 {
 	set(ptree);
+}
+
+CompositionView::~CompositionView()
+{
+
 }
 
 /**************************
@@ -45,7 +75,7 @@ void CompositionView::set(PropertyTree & ptree)
 
 Model::Composition * CompositionView::model()
 {
-	return model_;
+	return m->model;
 }
 
 void CompositionView::fillPropertiesWidget()
@@ -55,12 +85,12 @@ void CompositionView::fillPropertiesWidget()
 	QPushButton * addToLibrary = new QPushButton("Add to Library");
 	addToLibrary->setObjectName(savePtree(model()->get()));
 	connect(addToLibrary, SIGNAL(clicked()), scene()->views().first()->window(), SLOT(addToLibrary()));
-	dynamic_cast<QGridLayout*>(propertiesWidget->layout())->addWidget(addToLibrary, 1, 0, 2, 1);
+	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(addToLibrary, 1, 0, 2, 1);
 }
 
 void CompositionView::iterationCountUpdate(int iterationCount)
 {
-	model_->setIterationCount(iterationCount);
+	m->model->setIterationCount(iterationCount);
 }
 
 }

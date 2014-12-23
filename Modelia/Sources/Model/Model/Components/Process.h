@@ -8,10 +8,12 @@ namespace Model
 class Process : public Component
 {
 
-public:
+protected:
 
 	Process(Composition *, PropertyTree &);
-	virtual ~Process() = 0 {}
+	virtual ~Process() = 0;
+
+public:
 
 /**************************
 PropertyTrees
@@ -25,6 +27,11 @@ PropertyTrees
 	Slot * addOutput(PropertyTree &);
 
 	virtual Interface::ComponentView * view() override = 0;
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
+
 };
 
 }

@@ -5,11 +5,40 @@
 namespace Interface
 {
 
-VariableView::VariableView(Model::Variable * _model, PropertyTree & ptree)
-	: ComponentView(dynamic_cast<Model::Component*>(_model), ptree),
-	model_(_model)
+	class VariableView::Impl
+{
+	VariableView* w;
+
+public:
+
+	Model::Variable * model;
+
+	Impl(VariableView *, Model::Variable *);
+	~Impl();
+
+};
+
+VariableView::Impl::Impl(VariableView* owner, Model::Variable * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+VariableView::Impl::~Impl()
+{
+
+}
+
+VariableView::VariableView(Model::Variable * model, PropertyTree & ptree)
+	: m(new Impl(this, model)), ComponentView(static_cast<Model::Component*>(model), ptree)
 {
 	set(ptree);
+}
+
+VariableView::~VariableView()
+{
+
 }
 
 PropertyTree VariableView::get() const
@@ -29,7 +58,7 @@ void VariableView::set(PropertyTree & ptree)
 
 Model::Variable * VariableView::model()
 {
-	return model_;
+	return m->model;
 }
 
 void VariableView::paint(QPainter *painter, const QStyleOptionGraphicsItem *options, QWidget *widget)
@@ -50,11 +79,11 @@ void VariableView::drawIllustration(QPainter *painter, const QStyleOptionGraphic
 
 	QPen pen;
 	pen.setWidth(2);
-	QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, size_.width()));
+	QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, size().width()));
 	linearGrad.setColorAt(0, fillColor.lighter(120));
 	linearGrad.setColorAt(1, fillColor);
 	painter->setBrush(linearGrad);
-	painter->drawEllipse(QRectF(QPointF(0, 0), size_));
+	painter->drawEllipse(QRectF(QPointF(0, 0), size()));
 }
 
 }

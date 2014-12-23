@@ -10,8 +10,6 @@ class SlotView : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
 
-	Model::Slot * model_;
-
 public:
 
 	SlotView(Model::Slot *, PropertyTree &);
@@ -31,6 +29,10 @@ PropertyTrees
 	QPointF linkConnectionPos() const;
 
 	Model::Slot * model();
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

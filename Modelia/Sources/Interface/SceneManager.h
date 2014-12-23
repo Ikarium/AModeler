@@ -40,7 +40,7 @@ protected:
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *) override;
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *) override;
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *) override;
-	test
+
 
 protected slots:
 	void focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason);

@@ -8,11 +8,10 @@ namespace Interface
 class PureFunctionView : public ProcessView
 {
 
-	Model::PureFunction * model_;
-
 public:
 
 	PureFunctionView(Model::PureFunction *, PropertyTree &);
+	~PureFunctionView();
 
 	/**************************
 	PropertyTrees
@@ -22,6 +21,11 @@ public:
 	void set(PropertyTree &);
 
 	Model::PureFunction * model();
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
+
 };
 
 }

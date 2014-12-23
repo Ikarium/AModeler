@@ -15,11 +15,40 @@
 namespace Interface
 {
 
-ProcessView::ProcessView(Model::Process* _model, PropertyTree & ptree) 
-	: ComponentView(static_cast<Model::Component*>(_model), ptree),
-	model_(_model)
-{ 
+class ProcessView::Impl
+{
+	ProcessView* w;
+
+public:
+
+	Model::Process * model;
+
+	Impl(ProcessView *, Model::Process *);
+	~Impl();
+
+};
+
+ProcessView::Impl::Impl(ProcessView* owner, Model::Process * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+ProcessView::Impl::~Impl()
+{
+
+}
+
+ProcessView::ProcessView(Model::Process * model, PropertyTree & ptree)
+	: m(new Impl(this, model)), ComponentView(static_cast<Model::Process*>(model), ptree)
+{
 	set(ptree);
+}
+
+ProcessView::~ProcessView()
+{
+
 }
 
 /**************************
@@ -42,7 +71,7 @@ void ProcessView::set(PropertyTree & ptree)
 
 Model::Process * ProcessView::model()
 {
-	return model_;
+	return m->model;
 }
 
 void ProcessView::paint(QPainter *painter, const QStyleOptionGraphicsItem *options, QWidget *widget)
@@ -63,12 +92,12 @@ void ProcessView::drawIllustration(QPainter *painter, const QStyleOptionGraphics
 
 	QPen pen;
 	pen.setWidth(2);
-	QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, size_.width()));
+	QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, size().width()));
 	linearGrad.setColorAt(0, fillColor.lighter(120));
 	linearGrad.setColorAt(1, fillColor);
 	painter->setBrush(linearGrad);
-	painter->drawRoundedRect(	QRectF(QPointF(0, 0), size_), 
-								size_.width() / 10, size_.height()/10);
+	painter->drawRoundedRect(QRectF(QPointF(0, 0), size()),
+		size().width() / 10, size().height() / 10);
 }
 
 void ProcessView::fillPropertiesWidget()
@@ -78,9 +107,9 @@ void ProcessView::fillPropertiesWidget()
 	QGroupBox * inputs = new QGroupBox("Inputs");
 	QGridLayout * inputsLayout = new QGridLayout();
 	int i = 0;
-	for (Model::Slot & input : model_->inputs())
+	for (Model::Slot & input : m->model->inputs())
 	{
-		QLineEdit * inputLineEdit = new QLineEdit(input.name(), propertiesWidget);
+		QLineEdit * inputLineEdit = new QLineEdit(input.name(), propertiesWidget());
 		inputLineEdit->setObjectName(input.name());
 		inputsLayout->addWidget(inputLineEdit, i, 1);
 		connect(inputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
@@ -91,14 +120,14 @@ void ProcessView::fillPropertiesWidget()
 		i++;
 	}
 	inputs->setLayout(inputsLayout);
-	dynamic_cast<QGridLayout*>(propertiesWidget->layout())->addWidget(inputs, 0, 1);
+	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(inputs, 0, 1);
 
 	QGroupBox * outputs = new QGroupBox("Outputs");
 	QGridLayout * outputsLayout = new QGridLayout();
 	i = 0;
-	for (Model::Slot & output : model_->outputs())
+	for (Model::Slot & output : m->model->outputs())
 	{
-		QLineEdit * outputLineEdit = new QLineEdit(output.name(), propertiesWidget);
+		QLineEdit * outputLineEdit = new QLineEdit(output.name(), propertiesWidget());
 		outputLineEdit->setObjectName(output.name());
 		outputsLayout->addWidget(outputLineEdit, i, 1);
 		connect(outputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
@@ -112,17 +141,17 @@ void ProcessView::fillPropertiesWidget()
 	outputsLayout->addWidget(addNewOutputBtn, outputsLayout->rowCount(), 1, 2, 1);
 	outputs->setLayout(outputsLayout);
 	connect(addNewOutputBtn, SIGNAL(clicked()), this, SLOT(addNewOutput()));
-	dynamic_cast<QGridLayout*>(propertiesWidget->layout())->addWidget(outputs, 0, 2);
+	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(outputs, 0, 2);
 
 }
 
 void ProcessView::slotRename()
 {
-	Model::Slot * slot = model_->findSlot(sender()->objectName());
+	Model::Slot * slot = m->model->findSlot(sender()->objectName());
 	if (slot)
 	{
 		QLineEdit * outputLineEdit = dynamic_cast<QLineEdit *>(sender());
-		if (model_->findSlot(outputLineEdit->text()))
+		if (m->model->findSlot(outputLineEdit->text()))
 			outputLineEdit->setText(slot->name());
 		else
 			slot->setName(outputLineEdit->text());
@@ -135,13 +164,13 @@ void ProcessView::slotRename()
 
 void ProcessView::deleteSlot()
 {
-	Model::Slot * slot = model_->findSlot(sender()->objectName());
+	Model::Slot * slot = m->model->findSlot(sender()->objectName());
 
 	if (slot->slotType() == Model::SlotType::input)
-		model_->removeInput(slot);
-	else model_->removeOutput(slot);
-	clearLayout(propertiesWidget->layout());
-	delete propertiesWidget->layout();
+		m->model->removeInput(slot);
+	else m->model->removeOutput(slot);
+	clearLayout(propertiesWidget()->layout());
+	delete propertiesWidget()->layout();
 	fillPropertiesWidget();
 
 	updateSlots();
@@ -155,7 +184,7 @@ Model::Slot * ProcessView::addNewOutput()
 	ptree.put_value("Slot");
 
 	QString name = "y";
-	for (int i = 2; model_->findSlot(name); i++)
+	for (int i = 2; m->model->findSlot(name); i++)
 		name = "y" + QString::number(i);
 
 	ptree.put("Name", name.toStdString());
@@ -163,10 +192,10 @@ Model::Slot * ProcessView::addNewOutput()
 	ptree.put("SlotType", "Output");
 	ptree.put_child("Type", simpleType());
 
-	Model::Slot * slot = model_->addOutput(ptree);
+	Model::Slot * slot = m->model->addOutput(ptree);
 	slot->view()->setParentItem(this);
-	clearLayout(propertiesWidget->layout());
-	delete propertiesWidget->layout();
+	clearLayout(propertiesWidget()->layout());
+	delete propertiesWidget()->layout();
 	fillPropertiesWidget();
 
 	updateSlots();
@@ -181,7 +210,7 @@ Model::Slot * ProcessView::addNewInput()
 	ptree.put_value("Slot");
 
 	QString name = "x";
-	for (int i = 2; model_->findSlot(name); i++)
+	for (int i = 2; m->model->findSlot(name); i++)
 		name = "x" + QString::number(i);
 
 	ptree.put("Name", name.toStdString());
@@ -189,14 +218,14 @@ Model::Slot * ProcessView::addNewInput()
 	ptree.put("SlotType", "Input");
 	ptree.put_child("Type", simpleType());
 
-	Model::Slot * slot = model_->addInput(ptree);
+	Model::Slot * slot = m->model->addInput(ptree);
 	slot->view()->setParentItem(this);
-	if (propertiesWidget)
+	if (propertiesWidget())
 	{
-		if (propertiesWidget->layout())
+		if (propertiesWidget()->layout())
 		{
-			clearLayout(propertiesWidget->layout());
-			delete propertiesWidget->layout();
+			clearLayout(propertiesWidget()->layout());
+			delete propertiesWidget()->layout();
 		}
 		fillPropertiesWidget();
 	}

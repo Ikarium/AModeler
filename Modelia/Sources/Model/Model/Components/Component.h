@@ -12,16 +12,13 @@ class Component
 {
 
 protected:
-	Composition*	owner_;
-	QString			name_;
-	List<Slot>		inputs_;
-	List<Slot>		outputs_;
 
 	Component(Composition *, PropertyTree &);
 
-	virtual ~Component() = 0 {}
+	virtual ~Component() = 0;
 
 public:
+
 /**************************
 PropertyTrees
 ***************************/
@@ -33,6 +30,8 @@ PropertyTrees
 ***************************/
 	QString const & name() const;
 	void setName(QString const &);
+	List<Slot> const & inputs() const;
+	List<Slot> const & outputs() const;
 	Composition* owner();
 
 /**************************
@@ -44,13 +43,9 @@ PropertyTrees
 	List<Slot>::const_iterator findInputSlot(Slot *);
 	Slot * findInputSlot(QString);
 
-private:
-	void recalcInputPos();
-
 /**************************
 	outputs accessors
 ***************************/
-public:
 	List<Slot> & outputs();
 	Slot * addOutput(PropertyTree &);
 	void removeOutput(Slot *);
@@ -60,11 +55,6 @@ public:
 	virtual Slot * findSlot(QString);
 	void removeSlot(Slot *);
 
-private:
-	void recalcOutputPos();
-
-public:
-
 	virtual Interface::ComponentView* view() = 0;
 
 	operator QString () const;
@@ -72,6 +62,10 @@ public:
 	bool operator == (Component const &) const;
 
 	bool operator != (Component const &) const;
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

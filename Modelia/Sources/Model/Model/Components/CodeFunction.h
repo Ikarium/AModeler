@@ -10,12 +10,6 @@ namespace Model
 class CodeFunction : public Process
 {
 
-private:
-
-	QString code_;
-
-	Interface::CodeFunctionView view_;
-
 public:
 
 	CodeFunction(Composition *, PropertyTree &);
@@ -28,6 +22,10 @@ public:
 	void setCode(QString const &);
 
 	virtual Interface::CodeFunctionView* view() override;
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

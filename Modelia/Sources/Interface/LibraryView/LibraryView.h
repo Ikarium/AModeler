@@ -14,7 +14,6 @@ public:
 	LibraryView(QWidget * = nullptr);
 	~LibraryView();
 
-public:
 	void dragEnterEvent(QDragEnterEvent *);
 	void dragMoveEvent(QDragMoveEvent *);
 	void dragLeaveEvent(QDragLeaveEvent *);

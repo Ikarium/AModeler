@@ -10,18 +10,9 @@ namespace Model
 class Composition : public Process
 {
 
-	Interface::CompositionView view_;
-
-	List<Link> links_;
-	List<Variable> variables_;
-	List<PureFunction> pureFunctions_;
-	List<CodeFunction> codeFunctions_;
-	List<Composition> compositions_;
-
-	uint8 iterationCount_;
-
 public:
 	Composition(Composition *, PropertyTree &);
+	~Composition();
 
 /**************************
 PropertyTrees
@@ -63,6 +54,10 @@ Find
 	Component * find(QString const &);
 
 	virtual Interface::CompositionView * view() override;
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

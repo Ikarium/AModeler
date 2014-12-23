@@ -5,12 +5,40 @@
 namespace Model
 {
 
-CodeFunction::CodeFunction(Composition * owner, PropertyTree & ptree) 
-	: Process(owner, ptree),
-	view_(this, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
+class CodeFunction::Impl
 {
-		set(ptree);
-		view_.init();
+CodeFunction* w;
+
+public:
+
+	Type type;
+	Interface::CodeFunctionView view;
+	QString code;
+
+
+	Impl(CodeFunction*, PropertyTree &);
+	~Impl();
+
+};
+
+CodeFunction::Impl::Impl(CodeFunction* owner, PropertyTree & ptree)
+	: w(owner),
+	view(owner, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
+{
+
+}
+
+CodeFunction::Impl::~Impl()
+{
+
+}
+
+CodeFunction::CodeFunction(Composition * owner, PropertyTree & ptree)
+	: m(new Impl(this, ptree)), Process(owner, ptree)
+{
+
+	set(ptree);
+	m->view.init();
 }
 
 PropertyTree CodeFunction::get() const
@@ -18,8 +46,8 @@ PropertyTree CodeFunction::get() const
 	PropertyTree ptree = Process::get();
 
 	ptree.put_value("CodeFunction");
-	ptree.put("Code", code_.toStdString());
-	ptree.put_child("View", view_.get());
+	ptree.put("Code", m->code.toStdString());
+	ptree.put_child("View", m->view.get());
 
 	return ptree;
 }
@@ -28,16 +56,16 @@ void CodeFunction::set(PropertyTree & ptree)
 	checkHierarchy("CodeFunction", QString::fromStdString(ptree.get_value<std::string>()));
 
 	if (ptree.count("Code") != 0)
-		code_ = QString::fromStdString(ptree.get<std::string>("Code"));
+		m->code = QString::fromStdString(ptree.get<std::string>("Code"));
 
 }
 
-QString & CodeFunction::code() { return code_; }
-void CodeFunction::setCode(QString const & code) { code_ = code; }
+QString & CodeFunction::code() { return m->code; }
+void CodeFunction::setCode(QString const & code) { m->code = code; }
 
 Interface::CodeFunctionView * CodeFunction::view()
 {
-	return &view_;
+	return &m->view;
 }
 
 }

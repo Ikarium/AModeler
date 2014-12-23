@@ -5,12 +5,32 @@
 namespace Model
 {
 
+class PureFunction::Impl
+{
+	PureFunction* w;
+
+public:
+	Type type;
+	Interface::PureFunctionView view;
+	QString code;
+
+	Impl(PureFunction*, PropertyTree &);
+
+
+};
+
+PureFunction::Impl::Impl(PureFunction* owner, PropertyTree & ptree)
+	: w(owner),
+	view(owner, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
+{
+
+}
+
 PureFunction::PureFunction(Composition * owner, PropertyTree & ptree)
-	: Process(owner, ptree),
-	view_(this, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
+	: m(new Impl(this, ptree)), Process(owner, ptree)
 {
 	set(ptree);
-	view_.init();
+	m->view.init();
 }
 
 PropertyTree PureFunction::get() const
@@ -18,26 +38,27 @@ PropertyTree PureFunction::get() const
 	PropertyTree ptree = Process::get();
 
 	ptree.put_value("PureFunction");
-	ptree.put("Code", code_.toStdString());
-	ptree.put_child("View", view_.get());
+	ptree.put("Code", m->code.toStdString());
+	ptree.put_child("View", m->view.get());
 
 	return ptree;
 }
+
 void PureFunction::set(PropertyTree & ptree)
 {
 	checkHierarchy("PureFunction", QString::fromStdString(ptree.get_value<std::string>()));
 
 	if (ptree.count("Code") != 0)
-		code_ = QString::fromStdString(ptree.get<std::string>("Code"));
+		m->code = QString::fromStdString(ptree.get<std::string>("Code"));
 
 }
 
-QString & PureFunction::code() { return code_; }
-void PureFunction::code(QString const & code) { code_ = code; }
+QString & PureFunction::code() { return m->code; }
+void PureFunction::code(QString const & code) { m->code = code; }
 
 Interface::PureFunctionView * PureFunction::view() 
 { 
-	return &view_; 
+	return &m->view;
 }
 
 }

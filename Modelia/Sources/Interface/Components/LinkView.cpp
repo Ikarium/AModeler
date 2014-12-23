@@ -8,8 +8,34 @@
 namespace Interface
 {
 
-LinkView::LinkView(Model::Link * _model, PropertyTree & ptree)
-	: model_(_model)
+class LinkView::Impl
+{
+
+	LinkView* w;
+
+public:
+
+	Model::Link * model;
+
+	Impl(LinkView *, Model::Link *);
+	~Impl();
+
+};
+
+LinkView::Impl::Impl(LinkView* owner, Model::Link * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+LinkView::Impl::~Impl()
+{
+
+}
+
+LinkView::LinkView(Model::Link * model, PropertyTree & ptree)
+	: m(new Impl(this, model))
 {
 	set(ptree);
 	QPen pen;
@@ -21,8 +47,8 @@ LinkView::LinkView(Model::Link * _model, PropertyTree & ptree)
 	setPen(pen);
 
 	setZValue(-10);
-
 }
+
 LinkView::~LinkView()
 {
 
@@ -49,16 +75,16 @@ void LinkView::set(PropertyTree & ptree)
 
 Model::Link * LinkView::model()
 {
-	return model_;
+	return m->model;
 }
 
 
 void LinkView::paint(QPainter *painter, const QStyleOptionGraphicsItem * options, QWidget *)
 {
-	if (model_)
+	if (m->model)
 	{
-		QPointF from = model_->slot1()->view()->linkConnectionPos();
-		QPointF to = model_->slot2()->view()->linkConnectionPos();
+		QPointF from = m->model->slot1()->view()->linkConnectionPos();
+		QPointF to = m->model->slot2()->view()->linkConnectionPos();
 		setLine(QLineF(from, to));
 	}
 

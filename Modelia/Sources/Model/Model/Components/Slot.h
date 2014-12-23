@@ -11,16 +11,6 @@ enum class SlotType{ input, output };
 
 class Slot
 {
-private:
-
-	Interface::SlotView * view_ = nullptr;
-	SlotType slotType_;
-	Type type_;
-	uint pos_;
-	Component* owner_;
-	QString name_;
-	List<Link*> links_;
-	Link* uniqueLink_ = nullptr;
 
 public:
 	Slot(Component*, PropertyTree &);
@@ -72,6 +62,9 @@ public:
 
 	bool operator !=(Slot const &) const; 
 
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 };
 
 }

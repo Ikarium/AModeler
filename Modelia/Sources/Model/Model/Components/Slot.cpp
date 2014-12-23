@@ -10,24 +10,57 @@
 namespace Model
 {
 
-Slot::Slot(Component* owner, PropertyTree & ptree) 
-	: view_(new Interface::SlotView(this, ptree)), 
-	owner_(owner)
+class Slot::Impl
+{
+
+	Slot* w;
+
+public:
+
+	Interface::SlotView * view = nullptr;
+	SlotType slotType;
+	Type type;
+	uint pos;
+	Component* owner;
+	QString name;
+	List<Link*> links;
+	Link* uniqueLink = nullptr;
+
+	Impl(Slot*, Component*, PropertyTree &);
+	~Impl();
+
+};
+
+Slot::Impl::Impl(Slot* pimplOwner, Component* owner_, PropertyTree & ptree)
+	: w(pimplOwner),
+	owner(owner_),
+	view(new Interface::SlotView(pimplOwner, ptree))
+{
+
+}
+
+Slot::Impl::~Impl()
+{
+
+}
+
+Slot::Slot(Component * owner, PropertyTree & ptree)
+	: m(new Impl(this, owner, ptree))
 {
 	set(ptree);
 }
 
 Slot::~Slot()
 {
-	if (view_)
-		delete view_;
-	view_ = nullptr;
+	if (m->view)
+		delete m->view;
+	m->view = nullptr;
 
-	for (Link* link : links_)
+	for (Link* link : m->links)
 		link->owner()->removeLink(link); 
 
-	if (uniqueLink_ && uniqueLink_->slot1())
-		uniqueLink_->owner()->removeLink(uniqueLink_);
+	if (m->uniqueLink && m->uniqueLink->slot1())
+		m->uniqueLink->owner()->removeLink(m->uniqueLink);
 
 }
 
@@ -40,12 +73,12 @@ PropertyTree Slot::get() const
 
 	ptree.put_value("Slot");
 
-	ptree.put("Name", name_.toStdString());
-	ptree.put("Pos", pos_);
-	ptree.put("SlotType", (slotType_ == SlotType::input) ? "Input" : "Output");
-	ptree.put_child("Type", type_.get());
+	ptree.put("Name", m->name.toStdString());
+	ptree.put("Pos", m->pos);
+	ptree.put("SlotType", (m->slotType == SlotType::input) ? "Input" : "Output");
+	ptree.put_child("Type", m->type.get());
 
-	ptree.put_child("View", view_->get());
+	ptree.put_child("View", m->view->get());
 
 	return ptree;
 }
@@ -55,13 +88,13 @@ void Slot::set(PropertyTree & ptree)
 	checkHierarchy("Slot",
 		QString::fromStdString(ptree.get_value<std::string>()));
 
-	name_ = QString::fromStdString(ptree.get<std::string>("Name"));
+	m->name = QString::fromStdString(ptree.get<std::string>("Name"));
 
-	pos_ = (ptree.count("Pos") == 0) ? 0 : ptree.get<uint>("Pos");
-	slotType_ = QString::fromStdString(ptree.get<std::string>("SlotType")) == "Input" 
+	m->pos = (ptree.count("Pos") == 0) ? 0 : ptree.get<uint>("Pos");
+	m->slotType = QString::fromStdString(ptree.get<std::string>("SlotType")) == "Input"
 					? SlotType::input 
 					: SlotType::output;
-	type_ = Type(ptree.get_child("Type"));
+	m->type = Type(ptree.get_child("Type"));
 
 }
 
@@ -69,21 +102,21 @@ void Slot::set(PropertyTree & ptree)
 Getter
 ***************************/
 
-QString const & Slot::name() const { return name_; }
-Type const & Slot::type() const { return type_; }
-int const Slot::pos() const { return pos_; }
-Component const * Slot::owner() const { return owner_; }
-Component* Slot::owner() { return owner_; }
-SlotType Slot::slotType() { return slotType_; }
-List<Link*> & Slot::links() { return links_; }
-Link * Slot::uniqueLink() { return uniqueLink_; }
-Interface::SlotView * Slot::view() { return view_; }
-Interface::SlotView * const Slot::view() const { return view_; }
+QString const & Slot::name() const { return m->name; }
+Type const & Slot::type() const { return m->type; }
+int const Slot::pos() const { return m->pos; }
+Component const * Slot::owner() const { return m->owner; }
+Component* Slot::owner() { return m->owner; }
+SlotType Slot::slotType() { return m->slotType; }
+List<Link*> & Slot::links() { return m->links; }
+Link * Slot::uniqueLink() { return m->uniqueLink; }
+Interface::SlotView * Slot::view() { return m->view; }
+Interface::SlotView * const Slot::view() const { return m->view; }
 
 Vector<Slot*> Slot::linkedSlots()
 {
 	Vector<Slot*> linkedSlots;
-	for (Link* link : links_)
+	for (Link* link : m->links)
 		if (link->slot1() == this)
 			linkedSlots.push_back(link->slot2());
 		else
@@ -94,41 +127,41 @@ Vector<Slot*> Slot::linkedSlots()
 
 Slot* Slot::linkedUniqueSlot()
 {
-	if (uniqueLink_->slot1() == this)
-		return uniqueLink_->slot2();
+	if (m->uniqueLink->slot1() == this)
+		return m->uniqueLink->slot2();
 	else
-		return uniqueLink_->slot1();
+		return m->uniqueLink->slot1();
 }
 
 /**************************
 Setter
 ***************************/
 
-void Slot::pos(int pos) { pos_ = pos; }
-void Slot::setName(QString & name) { name_ = name; }
-void Slot::setViewDeleted() { view_ = nullptr; }
+void Slot::pos(int pos) { pos = pos; }
+void Slot::setName(QString & name) { name = name; }
+void Slot::setViewDeleted() { m->view = nullptr; }
 
-bool Slot::canLink() { return (!uniqueLink_ || links_.size() == 0); }
+bool Slot::canLink() { return (!m->uniqueLink || m->links.size() == 0); }
 
 void Slot::connectLink(Link * link)
 {
-	links_.emplace_back(link);
+	m->links.emplace_back(link);
 }
 
 void Slot::connectUniqueLink(Link * link)
 {
-	uniqueLink_ = link;
+	m->uniqueLink = link;
 }
 
 void Slot::unlink(Link * linkToDelete)
 {
-	links_.remove_if([linkToDelete](Link * t){ return t == linkToDelete; });
+	m->links.remove_if([linkToDelete](Link * t){ return t == linkToDelete; });
 
-	if (linkToDelete == uniqueLink_)
+	if (linkToDelete == m->uniqueLink)
 	{
-		uniqueLink_ = nullptr;
-		if (slotType_ == SlotType::input)
-				owner_->removeSlot(this);
+		m->uniqueLink = nullptr;
+		if (m->slotType == SlotType::input)
+			m->owner->removeSlot(this);
 	}
 }
 
@@ -140,14 +173,14 @@ Slot & Slot::operator=(Slot const & slot)
 
 bool Slot::operator ==(Slot const & slot) const
 {
-	if (slot.owner_ == owner_ && slot.name_ == name_)
+	if (slot.owner() == m->owner && slot.name() == m->name)
 		return true;
 	return false;
 }
 
 bool Slot::operator !=(Slot const & slot) const
 {
-	if (slot.owner_ != owner_ || slot.pos_ != pos_);
+	if (slot.owner() != m->owner || slot.pos() != m->pos);
 	return true;
 	return false;
 }

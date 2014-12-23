@@ -5,14 +5,39 @@
 namespace Model
 {
 
-Variable::Variable(Composition * owner, PropertyTree & ptree)
-	: Component(owner, ptree),
-	view_(this, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
-{ 
-	set(ptree); 
-	view_.init();
+class Variable::Impl
+{
+	Variable* w;
+
+public:
+
+	Type type;
+	Interface::VariableView view;
+
+	Impl(Variable*, PropertyTree &);
+	~Impl();
+
+};
+
+Variable::Impl::Impl(Variable* owner, PropertyTree & ptree)
+	: w(owner),
+	view(owner, ptree.count("View") != 0 ? ptree.get_child("View") : PropertyTree())
+{
+
 }
 
+Variable::Impl::~Impl()
+{
+
+}
+
+Variable::Variable(Composition * owner, PropertyTree & ptree)
+	: m(new Impl(this, ptree)), Component(owner, ptree)
+{
+
+	set(ptree);
+	m->view.init();
+}
 
 /**************************
 PropertyTrees
@@ -22,8 +47,8 @@ PropertyTree Variable::get() const
 	PropertyTree ptree = Component::get();
 
 	ptree.put_value("Variable");
-	ptree.put_child("Type", type_.get());
-	ptree.put_child("View", view_.get());
+	ptree.put_child("Type", m->type.get());
+	ptree.put_child("View", m->view.get());
 
 	return ptree;
 }
@@ -34,17 +59,17 @@ void Variable::set(PropertyTree & ptree)
 	
 	if (ptree.count("Type") != 0)
 	{
-		type_ = Type(ptree.get_child("Type"));
+		m->type = Type(ptree.get_child("Type"));
 
 		PropertyTree slot;
 		slot.put_value("Slot");
-		slot.put_child("Type", type_.get());
+		slot.put_child("Type", m->type.get());
 		slot.put("UniqueLink", false);
 		slot.put("SlotType", "Input");
-		slot.put("Name", name_.toStdString() + "_Input");
+		slot.put("Name", name().toStdString() + "_Input");
 		Component::addInput(slot);
 		slot.put("SlotType", "Output");
-		slot.put("Name", name_.toStdString() + "_Output");
+		slot.put("Name", name().toStdString() + "_Output");
 		Component::addOutput(slot);
 	}
 	else KThrow(ModeliaExection, lvl7, "Variable ptree must have Type.");
@@ -81,7 +106,7 @@ void Variable::removeOutput()
 
 Interface::VariableView * Variable::view()
 {
-	return &view_;
+	return &m->view;
 }
 
 }

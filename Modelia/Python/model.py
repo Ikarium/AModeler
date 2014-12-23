@@ -8,9 +8,9 @@ def Codefunction(iteration):
 def Composition(iteration, x):
 	y = None
 	Variable = None
-	def Test(iteration, x):
+	def Test2(iteration, x):
 		y = None
-		y = x * 9
+		y = x * 9+1
 
 		return (y)
 
@@ -22,10 +22,10 @@ def Composition(iteration, x):
 
 	for iteration in range(1):
 		None
-		var_Test_y = Test(iteration, x)
-		Variable = var_Test_y
-		Codefunction(iteration, Variable, var_Test_y)
-		y = var_Test_y
+		var_Test2_y = Test2(iteration, x)
+		Variable = var_Test2_y
+		Codefunction(iteration, Variable, var_Test2_y)
+		y = var_Test2_y
 	return (y)
 
 def Codefunction2(iteration, x):

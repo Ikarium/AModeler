@@ -15,20 +15,36 @@
 namespace Interface
 {
 
-void clearLayout(QLayout *layout)
+class ComponentView::Impl
 {
-	QLayoutItem *child;
-	while ((child = layout->takeAt(0)) != 0) {
-		if (child->layout() != 0)
-			clearLayout(child->layout());
-		else if (child->widget() != 0)
-			delete child->widget();
+	ComponentView* w;
 
-		delete child;
-	}
+public:
+
+	Model::Component * model;
+
+	QSizeF size;
+	QWidget* propertiesWidget = nullptr;
+
+	Impl(ComponentView *, Model::Component *);
+	~Impl();
+
+};
+
+ComponentView::Impl::Impl(ComponentView* owner, Model::Component * model_)
+	: w(owner),
+	model(model_)
+{
+
 }
 
-ComponentView::ComponentView(Model::Component * _model, PropertyTree & ptree) : model_(_model)
+ComponentView::Impl::~Impl()
+{
+
+}
+
+ComponentView::ComponentView(Model::Component * model, PropertyTree & ptree)
+	: m(new Impl(this, model))
 {
 	set(ptree);
 
@@ -42,29 +58,41 @@ ComponentView::ComponentView(Model::Component * _model, PropertyTree & ptree) : 
 	shadow->setBlurRadius(10);
 	shadow->setOffset(QPointF(0, 0));
 	setGraphicsEffect(shadow);
-
 }
 
 ComponentView::~ComponentView()
 {
-	if (model_)
+	if (m->model)
 	{
-		for (Model::Slot & input : model_->inputs())
+		for (Model::Slot & input : m->model->inputs())
 		{
 			input.setViewDeleted();
 		}
-		for (Model::Slot & output : model_->outputs())
+		for (Model::Slot & output : m->model->outputs())
 		{
 			output.setViewDeleted();
 		}
 	}
 }
 
+void clearLayout(QLayout *layout)
+{
+	QLayoutItem *child;
+	while ((child = layout->takeAt(0)) != 0) {
+		if (child->layout() != 0)
+			clearLayout(child->layout());
+		else if (child->widget() != 0)
+			delete child->widget();
+
+		delete child;
+	}
+}
+
 void ComponentView::init()
 {
-	for (Model::Slot & input : model_->inputs())
+	for (Model::Slot & input : m->model->inputs())
 		input.view()->setParentItem(this);
-	for (Model::Slot & output : model_->outputs())
+	for (Model::Slot & output : m->model->outputs())
 		output.view()->setParentItem(this);
 
 	updateSlots();
@@ -72,9 +100,9 @@ void ComponentView::init()
 
 void ComponentView::updateSlots()
 {
-	for (Model::Slot & input : model_->inputs())
+	for (Model::Slot & input : m->model->inputs())
 		input.view()->ownerChange();
-	for (Model::Slot & output : model_->outputs())
+	for (Model::Slot & output : m->model->outputs())
 		output.view()->ownerChange();
 }
 
@@ -89,47 +117,31 @@ PropertyTree ComponentView::get() const
 	ptree.put_value("View");
 	ptree.put("Pos.x", pos().x());
 	ptree.put("Pos.y", pos().y());
-	ptree.put("Size.width", size_.width());
-	ptree.put("Size.height", size_.height());
+	ptree.put("Size.width", m->size.width());
+	ptree.put("Size.height", m->size.height());
 
 	return ptree;
 }
 void ComponentView::set(PropertyTree & ptree)
 {
 	setPos(QPoint(0, 0));
-	size_ = QSize(100, 100);
+	m->size = QSize(100, 100);
 
 	if (ptree.get_value<std::string>() == "View")
 	{
 		if (ptree.count("Pos") != 0)
 			setPos(QPoint(ptree.get<float>("Pos.x"), ptree.get<float>("Pos.y")));
 		if (ptree.count("Size") != 0)
-			size_ = QSize(ptree.get<float>("Size.width"), ptree.get<float>("Size.height"));
+			m->size = QSize(ptree.get<float>("Size.width"), ptree.get<float>("Size.height"));
 	}
 
 }
 
-Model::Component * ComponentView::model()
-{
-	return model_;
-}
-
-QSizeF & ComponentView::size()
-{
-	return size_;
-}
-
-void ComponentView::setSize(QSizeF const & _size)
-{
-	size_ = _size;
-}
-
-QIcon ComponentView::getIcon()
-{
-	QIcon icon(getIllustration());
-
-	return icon;
-}
+Model::Component * ComponentView::model() { return m->model; }
+QSizeF const & ComponentView::size() const { return m->size; }
+void ComponentView::setSize(QSizeF const & _size) { m->size = _size; }
+QWidget* ComponentView::propertiesWidget() const { return m->propertiesWidget; }
+QIcon ComponentView::getIcon() { return getIllustration(); }
 
 void ComponentView::paint(QPainter *painter, const QStyleOptionGraphicsItem *options, QWidget *widget)
 {
@@ -139,7 +151,7 @@ void ComponentView::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 void ComponentView::drawName(QPainter *painter, const QStyleOptionGraphicsItem *options) const
 {
-	painter->drawText(QRectF(QPointF(0, 0), size_), Qt::AlignCenter, model_->name());
+	painter->drawText(QRectF(QPointF(0, 0), m->size), Qt::AlignCenter, m->model->name());
 }
 
 void ComponentView::drawIllustration(QPainter *painter, const QStyleOptionGraphicsItem *options) const
@@ -155,12 +167,12 @@ void ComponentView::drawIllustration(QPainter *painter, const QStyleOptionGraphi
 	pen.setWidth(2);
 	QBrush b = painter->brush();
 	painter->setBrush(fillColor);
-	painter->drawRect(QRectF(QPointF(0, 0), size_));
+	painter->drawRect(QRectF(QPointF(0, 0), m->size));
 }
 
 QPixmap const ComponentView::getIllustration() const
 {
-	QPixmap pixmap(size_.toSize());
+	QPixmap pixmap(m->size.toSize());
 
 	QPainter painter(&pixmap);
 	drawIllustration(&painter, &QStyleOptionGraphicsItem());
@@ -169,7 +181,7 @@ QPixmap const ComponentView::getIllustration() const
 
 QRectF ComponentView::boundingRect() const
 {
-	return QRectF(size_.height() * -0.1, size_.width() * -0.1, size_.height() * 1.2, size_.width() * 1.2);
+	return QRectF(m->size.height() * -0.1, m->size.width() * -0.1, m->size.height() * 1.2, m->size.width() * 1.2);
 }
 
 
@@ -205,24 +217,24 @@ QVariant ComponentView::itemChange(GraphicsItemChange change, const QVariant &va
 
 void ComponentView::setPropertiesWidget(QWidget* propertiesWidget_)
 {
-	propertiesWidget = propertiesWidget_;
+	m->propertiesWidget = propertiesWidget_;
 }
 
 void ComponentView::fillPropertiesWidget()
 {
 	QGridLayout *mainLayout = new QGridLayout;
-	propertiesWidget->setLayout(mainLayout);
+	m->propertiesWidget->setLayout(mainLayout);
 	mainLayout->setSizeConstraint(QLayout::SetMaximumSize);
 
 	QGroupBox * fields = new QGroupBox("Properties");
 	QFormLayout *fieldsLayout = new QFormLayout();
-	propertyWidgetElements.name = new QLineEdit(model_->name(), propertiesWidget);
+	propertyWidgetElements.name = new QLineEdit(m->model->name(), m->propertiesWidget);
 	fieldsLayout->addRow("Name:", propertyWidgetElements.name);
 	connect(propertyWidgetElements.name, SIGNAL(editingFinished()), this, SLOT(nameValidator()));
 	QPushButton * deleteComponentBtn = new QPushButton("Delete component");
-	deleteComponentBtn->setObjectName(model_->name());
+	deleteComponentBtn->setObjectName(m->model->name());
 	fieldsLayout->addRow("", deleteComponentBtn);
-	connect(deleteComponentBtn, SIGNAL(clicked()), model_->owner()->view(), SLOT(deleteComponent()));
+	connect(deleteComponentBtn, SIGNAL(clicked()), m->model->owner()->view(), SLOT(deleteComponent()));
 	fields->setLayout(fieldsLayout);
 	mainLayout->addWidget(fields, 0, 0);
 
@@ -231,10 +243,10 @@ void ComponentView::fillPropertiesWidget()
 void ComponentView::nameValidator()
 {
 	QLineEdit * outputLineEdit = dynamic_cast<QLineEdit *>(sender());
-	if (model_->owner()->find(outputLineEdit->text()))
-		outputLineEdit->setText(model_->name());
+	if (m->model->owner()->find(outputLineEdit->text()))
+		outputLineEdit->setText(m->model->name());
 	else
-		model_->setName(outputLineEdit->text());
+		m->model->setName(outputLineEdit->text());
 	update();
 	
 }

@@ -9,9 +9,6 @@ namespace Model
 
 class PureFunction : public Process
 {
-	QString code_;
-
-	Interface::PureFunctionView view_;
 
 public:
 	PureFunction(Composition *, PropertyTree &);
@@ -24,6 +21,11 @@ public:
 	void code(QString const &);
 
 	virtual Interface::PureFunctionView * view() override;
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
+
 };
 
 }

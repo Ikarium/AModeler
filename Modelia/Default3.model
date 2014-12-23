@@ -1,99 +1,16 @@
 Name Root
-IterationCount 5
+IterationCount 1
 Elements
 {
-    Element Variable
-    {
-        Name Variable
-        Type Type
-        {
-            Vectorized false
-            Class Class
-            {
-                Name T
-                Properties
-                {
-                    Property
-                    {
-                        Name x
-                        BaseType 1
-                    }
-                    Property
-                    {
-                        Name y
-                        BaseType 1
-                    }
-                }
-            }
-        }
-        View View
-        {
-            Pos
-            {
-                x -379
-                y -141
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
-        }
-    }
     Element CodeFunction
     {
         Name Codefunction
-        Inputs
-        {
-            Slot Slot
-            {
-                Name x
-                Pos 0
-                UniqueLink true
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                Links
-                {
-                    Link Link
-                    {
-                        Input
-                        {
-                            ComponentName Codefunction
-                            SlotName x
-                        }
-                        Output
-                        {
-                            ComponentName Variable
-                            SlotName Variable
-                        }
-                        View ""
-                    }
-                }
-                View ""
-            }
-        }
         Outputs
         {
             Slot Slot
             {
                 Name y
                 Pos 0
-                UniqueLink false
                 SlotType Output
                 Type Type
                 {
@@ -114,13 +31,13 @@ Elements
                 View ""
             }
         }
-        Code "if x is None:\n  x = 1 \ny = x*2 "
+        Code "y = 1"
         View View
         {
             Pos
             {
-                x -485
-                y 79
+                x -747
+                y -224
             }
             Size
             {
@@ -138,7 +55,6 @@ Elements
             {
                 Name x
                 Pos 0
-                UniqueLink true
                 SlotType Input
                 Type Type
                 {
@@ -154,32 +70,35 @@ Elements
                                 BaseType 1
                             }
                         }
-                    }
-                }
-                Links
-                {
-                    Link Link
-                    {
-                        Input
-                        {
-                            ComponentName Codefunction2
-                            SlotName x
-                        }
-                        Output
-                        {
-                            ComponentName Variable
-                            SlotName Variable
-                        }
-                        View ""
                     }
                 }
                 View ""
             }
+        }
+        Code print(x)
+        View View
+        {
+            Pos
+            {
+                x -353
+                y -227
+            }
+            Size
+            {
+                width 100
+                height 100
+            }
+        }
+    }
+    Element Composition
+    {
+        Name Composition
+        Inputs
+        {
             Slot Slot
             {
-                Name x2
-                Pos 1
-                UniqueLink true
+                Name x
+                Pos 0
                 SlotType Input
                 Type Type
                 {
@@ -195,23 +114,6 @@ Elements
                                 BaseType 1
                             }
                         }
-                    }
-                }
-                Links
-                {
-                    Link Link
-                    {
-                        Input
-                        {
-                            ComponentName Codefunction2
-                            SlotName x2
-                        }
-                        Output
-                        {
-                            ComponentName Codefunction
-                            SlotName y
-                        }
-                        View ""
                     }
                 }
                 View ""
@@ -223,7 +125,6 @@ Elements
             {
                 Name y
                 Pos 0
-                UniqueLink false
                 SlotType Output
                 Type Type
                 {
@@ -244,13 +145,264 @@ Elements
                 View ""
             }
         }
-        Code "y = x/10"
+        IterationCount 1
+        Elements
+        {
+            Element Variable
+            {
+                Name Variable
+                Type Type
+                {
+                    Vectorized false
+                    Class Class
+                    {
+                        Name T
+                        Properties
+                        {
+                            Property
+                            {
+                                Name x
+                                BaseType 1
+                            }
+                            Property
+                            {
+                                Name y
+                                BaseType 1
+                            }
+                        }
+                    }
+                }
+                View View
+                {
+                    Pos
+                    {
+                        x -157
+                        y -213
+                    }
+                    Size
+                    {
+                        width 100
+                        height 100
+                    }
+                }
+            }
+            Element CodeFunction
+            {
+                Name Test2
+                Inputs
+                {
+                    Slot Slot
+                    {
+                        Name x
+                        Pos 0
+                        SlotType Input
+                        Type Type
+                        {
+                            Vectorized false
+                            Class Class
+                            {
+                                Name T
+                                Properties
+                                {
+                                    Property
+                                    {
+                                        Name simpleType
+                                        BaseType 1
+                                    }
+                                }
+                            }
+                        }
+                        View ""
+                    }
+                }
+                Outputs
+                {
+                    Slot Slot
+                    {
+                        Name y
+                        Pos 0
+                        SlotType Output
+                        Type Type
+                        {
+                            Vectorized false
+                            Class Class
+                            {
+                                Name T
+                                Properties
+                                {
+                                    Property
+                                    {
+                                        Name simpleType
+                                        BaseType 1
+                                    }
+                                }
+                            }
+                        }
+                        View ""
+                    }
+                }
+                Code "y = x * 9+1"
+                View View
+                {
+                    Pos
+                    {
+                        x -297
+                        y -49
+                    }
+                    Size
+                    {
+                        width 100
+                        height 100
+                    }
+                }
+            }
+            Element CodeFunction
+            {
+                Name Codefunction
+                Inputs
+                {
+                    Slot Slot
+                    {
+                        Name x
+                        Pos 0
+                        SlotType Input
+                        Type Type
+                        {
+                            Vectorized false
+                            Class Class
+                            {
+                                Name T
+                                Properties
+                                {
+                                    Property
+                                    {
+                                        Name simpleType
+                                        BaseType 1
+                                    }
+                                }
+                            }
+                        }
+                        View ""
+                    }
+                    Slot Slot
+                    {
+                        Name x2
+                        Pos 1
+                        SlotType Input
+                        Type Type
+                        {
+                            Vectorized false
+                            Class Class
+                            {
+                                Name T
+                                Properties
+                                {
+                                    Property
+                                    {
+                                        Name simpleType
+                                        BaseType 1
+                                    }
+                                }
+                            }
+                        }
+                        View ""
+                    }
+                }
+                Code "print(x * 2)\nprint(x2 * 3)"
+                View View
+                {
+                    Pos
+                    {
+                        x -4
+                        y -174
+                    }
+                    Size
+                    {
+                        width 100
+                        height 100
+                    }
+                }
+            }
+        }
+        Links
+        {
+            Link Link
+            {
+                Slot1
+                {
+                    ComponentName __Parent
+                    SlotName x
+                }
+                Slot2
+                {
+                    ComponentName Test2
+                    SlotName x
+                }
+                View ""
+            }
+            Link Link
+            {
+                Slot1
+                {
+                    ComponentName Test2
+                    SlotName y
+                }
+                Slot2
+                {
+                    ComponentName __Parent
+                    SlotName y
+                }
+                View ""
+            }
+            Link Link
+            {
+                Slot1
+                {
+                    ComponentName Test2
+                    SlotName y
+                }
+                Slot2
+                {
+                    ComponentName Variable
+                    SlotName Variable_Input
+                }
+                View ""
+            }
+            Link Link
+            {
+                Slot1
+                {
+                    ComponentName Variable
+                    SlotName Variable_Output
+                }
+                Slot2
+                {
+                    ComponentName Codefunction
+                    SlotName x
+                }
+                View ""
+            }
+            Link Link
+            {
+                Slot1
+                {
+                    ComponentName Test2
+                    SlotName y
+                }
+                Slot2
+                {
+                    ComponentName Codefunction
+                    SlotName x2
+                }
+                View ""
+            }
+        }
         View View
         {
             Pos
             {
-                x -292
-                y 65
+                x -586
+                y -230
             }
             Size
             {
@@ -259,108 +411,36 @@ Elements
             }
         }
     }
-    Element CodeFunction
+}
+Links
+{
+    Link Link
     {
-        Name Codefunction3
-        Inputs
+        Slot1
         {
-            Slot Slot
-            {
-                Name x
-                Pos 0
-                UniqueLink true
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                Links
-                {
-                    Link Link
-                    {
-                        Input
-                        {
-                            ComponentName Codefunction3
-                            SlotName x
-                        }
-                        Output
-                        {
-                            ComponentName Codefunction2
-                            SlotName y
-                        }
-                        View ""
-                    }
-                }
-                View ""
-            }
-            Slot Slot
-            {
-                Name x2
-                Pos 1
-                UniqueLink true
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                Links
-                {
-                    Link Link
-                    {
-                        Input
-                        {
-                            ComponentName Codefunction3
-                            SlotName x2
-                        }
-                        Output
-                        {
-                            ComponentName Variable
-                            SlotName Variable
-                        }
-                        View ""
-                    }
-                }
-                View ""
-            }
+            ComponentName Codefunction
+            SlotName y
         }
-        Code print(x2)
-        View View
+        Slot2
         {
-            Pos
-            {
-                x -60
-                y -87
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
+            ComponentName Composition
+            SlotName x
         }
+        View ""
+    }
+    Link Link
+    {
+        Slot1
+        {
+            ComponentName Composition
+            SlotName y
+        }
+        Slot2
+        {
+            ComponentName Codefunction2
+            SlotName x
+        }
+        View ""
     }
 }
 View View

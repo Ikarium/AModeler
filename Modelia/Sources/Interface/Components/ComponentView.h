@@ -16,20 +16,14 @@ class ComponentView : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
 
-protected:
-
-	QSizeF size_;
-
-	Model::Component * model_;
-
-	QWidget* propertiesWidget = nullptr;
-
 public:
 
 	ComponentView(Model::Component *, PropertyTree &);
 	~ComponentView();
 	virtual void init();
 	virtual void updateSlots();
+	void setPropertiesWidget(QWidget*);
+	virtual void fillPropertiesWidget();
 
 /**************************
 PropertyTrees
@@ -39,8 +33,9 @@ PropertyTrees
 	void set(PropertyTree &);
 
 	Model::Component * model();
-	QSizeF & size();
+	QSizeF const & size() const;
 	void setSize(QSizeF const &);
+	QWidget* propertiesWidget() const;
 
 	QIcon getIcon();
 
@@ -64,14 +59,13 @@ protected:
 	};
 	PropertyWidgetElements propertyWidgetElements;
 
-
-public:
-	void setPropertiesWidget(QWidget*);
-	virtual void fillPropertiesWidget();
-
 protected slots:
 	void nameValidator();
 	void deleteComponent();
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 };
 
 }

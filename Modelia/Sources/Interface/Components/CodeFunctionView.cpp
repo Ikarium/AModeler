@@ -13,11 +13,40 @@
 namespace Interface
 {
 
-CodeFunctionView::CodeFunctionView(Model::CodeFunction * _model, PropertyTree & ptree) 
-	: ProcessView(static_cast<Model::Process*>(_model), ptree),
-	model_(_model)
+class CodeFunctionView::Impl
+{
+	CodeFunctionView* w;
+
+public:
+
+	Model::CodeFunction * model;
+
+	Impl(CodeFunctionView *, Model::CodeFunction *);
+	~Impl();
+
+};
+
+CodeFunctionView::Impl::Impl(CodeFunctionView* owner, Model::CodeFunction * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+CodeFunctionView::Impl::~Impl()
+{
+
+}
+
+CodeFunctionView::CodeFunctionView(Model::CodeFunction * model, PropertyTree & ptree)
+	: m(new Impl(this, model)), ProcessView(static_cast<Model::Process*>(model), ptree)
 {
 	set(ptree);
+}
+
+CodeFunctionView::~CodeFunctionView()
+{
+
 }
 
 /**************************
@@ -41,7 +70,7 @@ void CodeFunctionView::set(PropertyTree & ptree)
 
 Model::CodeFunction * CodeFunctionView::model()
 {
-	return model_;
+	return m->model;
 }
 
 void CodeFunctionView::fillPropertiesWidget()
@@ -52,19 +81,19 @@ void CodeFunctionView::fillPropertiesWidget()
 	QGridLayout *codeLayout = new QGridLayout();
 	code->setLayout(codeLayout);
 	QTextEdit* codeText = new QTextEdit();
-	codeText->setPlainText(model_->code());
+	codeText->setPlainText(m->model->code());
 	codeText->resize(QSize(200, 50));
 	codeLayout->addWidget(codeText);
 	connect(codeText, SIGNAL(textChanged()), this, SLOT(codeEdited()));
 
-	dynamic_cast<QGridLayout*>(propertiesWidget->layout())->addWidget(code, 1, 0, 2, 1);
+	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(code, 1, 0, 2, 1);
 }
 
 void CodeFunctionView::codeEdited()
 {
 	QTextEdit * newCode = dynamic_cast<QTextEdit *>(sender());
 
-	model_->setCode(newCode->toPlainText());
+	m->model->setCode(newCode->toPlainText());
 }
 
 }

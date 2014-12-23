@@ -9,16 +9,10 @@ namespace Model
 
 class Link
 {
-	Interface::LinkView view_;
-
-	Composition * owner_;
-
-	Slot * slot1_ = nullptr;
-	Slot * slot2_ = nullptr;
 
 public:
 	Link(Composition *, PropertyTree &);
-
+	
 	~Link();
 
 	PropertyTree get() const;
@@ -38,9 +32,10 @@ public:
 
 	Interface::LinkView * Link::view();
 
+private:
+	class Impl;
+	UniquePtr<Impl> m;
+
 };
-
-
-
 
 }

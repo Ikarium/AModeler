@@ -11,11 +11,10 @@ class CodeFunctionView : public ProcessView
 {
 	Q_OBJECT
 
-	Model::CodeFunction * model_;
-
 public:
 
 	CodeFunctionView(Model::CodeFunction *, PropertyTree &);
+	~CodeFunctionView();
 	
 /**************************
 PropertyTrees
@@ -30,6 +29,10 @@ PropertyTrees
 
 public slots:
 	void codeEdited();
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

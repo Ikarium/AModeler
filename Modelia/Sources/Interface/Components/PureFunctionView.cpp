@@ -5,11 +5,40 @@
 namespace Interface
 {
 
-PureFunctionView::PureFunctionView(Model::PureFunction * _model, PropertyTree & ptree)
-	: ProcessView(static_cast<Model::Process*>(_model), ptree),
-	model_(_model)
+class PureFunctionView::Impl
+{
+	PureFunctionView* w;
+
+public:
+
+	Model::PureFunction * model;
+
+	Impl(PureFunctionView *, Model::PureFunction *);
+	~Impl();
+
+};
+
+PureFunctionView::Impl::Impl(PureFunctionView* owner, Model::PureFunction * model_)
+	: w(owner),
+	model(model_)
+{
+
+}
+
+PureFunctionView::Impl::~Impl()
+{
+
+}
+
+PureFunctionView::PureFunctionView(Model::PureFunction * model, PropertyTree & ptree)
+	: m(new Impl(this, model)), ProcessView(static_cast<Model::Process*>(model), ptree)
 {
 	set(ptree);
+}
+
+PureFunctionView::~PureFunctionView()
+{
+
 }
 
 /**************************
@@ -33,7 +62,7 @@ void PureFunctionView::set(PropertyTree & ptree)
 
 Model::PureFunction * PureFunctionView::model()
 {
-	return model_;
+	return m->model;
 }
 
 }

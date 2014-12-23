@@ -11,11 +11,10 @@ class CompositionView : public ProcessView
 {
 	Q_OBJECT
 
-	Model::Composition * model_;
-
 public:
 
 	CompositionView(Model::Composition *, PropertyTree &);
+	~CompositionView();
 
 	/**************************
 	PropertyTrees
@@ -30,6 +29,10 @@ public:
 
 public slots:
 	void iterationCountUpdate(int);
+
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 
 };
 

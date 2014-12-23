@@ -9,9 +9,6 @@ namespace Model
 
 class Variable : public Component
 {
-	Type type_;
-
-	Interface::VariableView view_;
 
 public:
 	Variable(Composition *, PropertyTree &);
@@ -37,5 +34,8 @@ public:
 
 	virtual Interface::VariableView * view() override;
 
+private:
+	class Impl;
+	UniquePtr<Impl> m;
 };
 }

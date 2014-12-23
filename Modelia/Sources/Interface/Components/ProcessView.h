@@ -7,14 +7,11 @@ namespace Interface
 
 class ProcessView : public ComponentView
 {
-
 	Q_OBJECT
-
-	Model::Process* model_;
-
 public:
 
 	ProcessView(Model::Process*, PropertyTree &);
+	~ProcessView();
 
 /**************************
 PropertyTrees
@@ -39,5 +36,10 @@ public slots:
 	Model::Slot * addNewOutput();
 	Model::Slot * addNewInput();
 
+private:
+	class Impl;
+	UniquePtr<Impl> m;
+
 };
+
 }
