@@ -1,6 +1,7 @@
 #include "Conf.h"
 
 #include "Variable.h"
+#include "Model/TypesManager/TypesLibrary.h"
 
 namespace Model
 {
@@ -11,8 +12,9 @@ class Variable::Impl
 
 public:
 
-	Type type;
+	Type* type;
 	Interface::VariableView view;
+	QString initialValue;
 
 	Impl(Variable*, PropertyTree &);
 	~Impl();
@@ -35,35 +37,35 @@ Variable::Variable(Composition * owner, PropertyTree & ptree)
 	: m(new Impl(this, ptree)), Component(owner, ptree)
 {
 
-	set(ptree);
+	import(ptree);
 	m->view.init();
 }
 
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree Variable::get() const
+PropertyTree Variable::export() const
 {
-	PropertyTree ptree = Component::get();
+	PropertyTree ptree = Component::export();
 
 	ptree.put_value("Variable");
-	ptree.put_child("Type", m->type.get());
-	ptree.put_child("View", m->view.get());
+	ptree.put("Type", m->type->getPath().toStdString());
+	ptree.put_child("View", m->view.export());
 
 	return ptree;
 }
 
-void Variable::set(PropertyTree & ptree)
+void Variable::import(PropertyTree & ptree)
 {
 	checkHierarchy("Variable", QString::fromStdString(ptree.get_value<std::string>()));
 	
 	if (ptree.count("Type") != 0)
 	{
-		m->type = Type(ptree.get_child("Type"));
+		m->type = App::typesLibrary->usePath(QString::fromStdString(ptree.get<std::string>("Type")));
 
 		PropertyTree slot;
 		slot.put_value("Slot");
-		slot.put_child("Type", m->type.get());
+		slot.put("Type", m->type->getPath().toStdString());
 		slot.put("UniqueLink", false);
 		slot.put("SlotType", "Input");
 		slot.put("Name", name().toStdString() + "_Input");
@@ -77,33 +79,34 @@ void Variable::set(PropertyTree & ptree)
 }
 
 /**************************
-inputs accessors
+Slot accessors
 ***************************/
-void Variable::addInput(PropertyTree & ptree)
+Slot * Variable::addInput(PropertyTree & ptree)
 {
 	KThrow(ModeliaExection, lvl5, "Variable inputs are fixed.");
 
+	return nullptr;
 }
 
 void Variable::removeInput()
 {
 	KThrow(ModeliaExection, lvl5, "Variable inputs are fixed.");
+
 }
 
-
-/**************************
-outputs accessors
-***************************/
-void Variable::addOutput(PropertyTree & ptree)
+Slot * Variable::addOutput(PropertyTree & ptree)
 {
 	KThrow(ModeliaExection, lvl5, "Variable outputs are fixed.");
+
+	return nullptr;
 }
 
 void Variable::removeOutput()
 {
 	KThrow(ModeliaExection, lvl5, "Variable outputs are fixed.");
 }
-
+QString Variable::initialValue() { return m->initialValue; }
+void Variable::setInitialValue(QString newValue) { m->initialValue = newValue; }
 Interface::VariableView * Variable::view()
 {
 	return &m->view;

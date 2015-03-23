@@ -2,75 +2,55 @@ FileType Library
 Root LibraryItem
 {
 	Name root
-	isElement false
 
 	Items
 	{
 		Item LibraryItem
 		{
-			Name Variable
-			isElement true
-			
-			Element Variable
+			Name Base
+			Items
 			{
-				Name Variable
-				
-				Type Type
+				Item LibraryItem
 				{
-					Vectorized 0
-					Class Class
+					Name Variable
+					
+					Element Variable
 					{
-						Name T
-						Properties
-						{
-							Property
-							{
-								Name x
-								BaseType 1
-							}
-							Property
-							{
-								Name y
-								BaseType 1
-							}
-						}
+						Name Variable
+						
+						Type Core.Integer
+						
 					}
 				}
-				
+				Item LibraryItem
+				{
+					Name Function
+					
+					Element Function
+					{
+						Name Function
+						
+					}
+				}
+				Item LibraryItem
+				{
+					Name Composition
+					
+					Element Composition
+					{
+						Name Composition
+						
+					}
+				}
 			}
 		}
 		Item LibraryItem
 		{
-			Name Purefunction
-			isElement true
-			
-			Element PureFunction
-			{
-				Name Purefunction
-				
-			}
+			Name Model
 		}
 		Item LibraryItem
 		{
-			Name Codefunction
-			isElement true
-			
-			Element CodeFunction
-			{
-				Name Codefunction
-				
-			}
-		}
-		Item LibraryItem
-		{
-			Name Composition
-			isElement true
-			
-			Element Composition
-			{
-				Name Composition
-				
-			}
+			Name Library
 		}
 	}
 }

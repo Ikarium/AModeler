@@ -10,6 +10,8 @@ namespace Interface
 class VariableView : public ComponentView
 {
 
+	Q_OBJECT
+
 public:
 
 	VariableView(Model::Variable *, PropertyTree &);
@@ -18,15 +20,21 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	Model::Variable * model();
+
+	virtual void fillPropertiesWidget() override;
+	virtual void savePropertyWidget() override;
+	void setInitialValue(QString);
 
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) override;
 private:
 	virtual void drawIllustration(QPainter *, const QStyleOptionGraphicsItem *) const override;
+
+public slots:
+	void updateInitialValue();
 
 private:
 	class Impl;

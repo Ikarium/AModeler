@@ -48,9 +48,6 @@
     <ClCompile Include="Sources\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Rcc\qrc_Modelia.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_MainWindow.cpp">
       <Filter>Generated Files\Debug_Win32</Filter>
     </ClCompile>
@@ -72,9 +69,6 @@
     <ClCompile Include="Sources\Model\Model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Model\Model\Components\CodeFunction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Model\Model\Components\Component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,41 +81,8 @@
     <ClCompile Include="Sources\Model\Model\Components\Process.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Model\Model\Components\PureFunction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Model\Model\Components\Variable.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Model\Library\Library.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_LibraryView.cpp">
-      <Filter>Generated Files\Debug_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_LibraryView.cpp">
-      <Filter>Generated Files\Debug_x64</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_LibraryView.cpp">
-      <Filter>Generated Files\Release_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Release\Moc\moc_LibraryView.cpp">
-      <Filter>Generated Files\Release_x64</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Interface\LibraryView\LibraryView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_Library.cpp">
-      <Filter>Generated Files\Debug_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_Library.cpp">
-      <Filter>Generated Files\Debug_x64</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_Library.cpp">
-      <Filter>Generated Files\Release_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Release\Moc\moc_Library.cpp">
-      <Filter>Generated Files\Release_x64</Filter>
     </ClCompile>
     <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_SceneView.cpp">
       <Filter>Generated Files\Debug_Win32</Filter>
@@ -141,9 +102,6 @@
     <ClCompile Include="Sources\Interface\Components\VariableView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Interface\Components\CodeFunctionView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Interface\Components\ComponentView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -154,9 +112,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Interface\Components\ProcessView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Interface\Components\PureFunctionView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_SceneManager.cpp">
@@ -228,18 +183,6 @@
     <ClCompile Include="Sources\Model\Compiler\Compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_CodeFunctionView.cpp">
-      <Filter>Generated Files\Debug_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_CodeFunctionView.cpp">
-      <Filter>Generated Files\Debug_x64</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_CodeFunctionView.cpp">
-      <Filter>Generated Files\Release_Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\temp\x64\Release\Moc\moc_CodeFunctionView.cpp">
-      <Filter>Generated Files\Release_x64</Filter>
-    </ClCompile>
     <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_CompositionView.cpp">
       <Filter>Generated Files\Debug_Win32</Filter>
     </ClCompile>
@@ -252,11 +195,131 @@
     <ClCompile Include="Build\temp\x64\Release\Moc\moc_CompositionView.cpp">
       <Filter>Generated Files\Release_x64</Filter>
     </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_KExpandableWidget.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_KExpandableWidget.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_KExpandableWidget.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_KExpandableWidget.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_FunctionView.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_FunctionView.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_FunctionView.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_FunctionView.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Interface\Components\FunctionView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Model\Model\Components\Function.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_VariableView.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_VariableView.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_VariableView.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_VariableView.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Model\TypesManager\Type.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Model\TypesManager\typesLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Model\ComponentsLibrary\ComponentsLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_ComponentsLibrary.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_ComponentsLibrary.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_ComponentsLibrary.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_ComponentsLibrary.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_ComponentsLibraryView.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_ComponentsLibraryView.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_ComponentsLibraryView.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_ComponentsLibraryView.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Interface\ComponentsLibraryView\ComponentsLibraryView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_typesLibrary.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_typesLibrary.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_typesLibrary.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_typesLibrary.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\App.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Interface\TypesManagerView\TypesLibraryView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_TypesLibraryView.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_TypesLibraryView.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_TypesLibraryView.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_TypesLibraryView.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Interface\TypesManagerView\TypeEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Debug\Moc\moc_TypeEditor.cpp">
+      <Filter>Generated Files\Debug_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Debug\Moc\moc_TypeEditor.cpp">
+      <Filter>Generated Files\Debug_x64</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\Win32\Release\Moc\moc_TypeEditor.cpp">
+      <Filter>Generated Files\Release_Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\temp\x64\Release\Moc\moc_TypeEditor.cpp">
+      <Filter>Generated Files\Release_x64</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Sources\Modelia.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Sources\Interface\MainWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -266,19 +329,10 @@
     <CustomBuild Include="Sources\Interface\SceneManager.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Sources\Model\Library\Library.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Sources\Interface\LibraryView\LibraryView.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Sources\Interface\SceneView.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Sources\Interface\Components\VariableView.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Sources\Interface\Components\PureFunctionView.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Sources\Interface\Components\CompositionView.h">
@@ -290,13 +344,46 @@
     <CustomBuild Include="Sources\Interface\Components\ProcessView.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Sources\Interface\Components\CodeFunctionView.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Sources\Interface\Components\SlotView.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Sources\Interface\Components\LinkView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\ComponentProperties.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\ProcessProperties.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\CompositionProperties.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\VariableProperties.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\KExpandableWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\FunctionProperties.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\Components\FunctionView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Model\ComponentsLibrary\ComponentsLibrary.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\ComponentsLibraryView\ComponentsLibraryView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Model\TypesManager\typesLibrary.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\TypesManagerView\TypesLibraryView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sources\Interface\TypesManagerView\TypeEditor.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -313,15 +400,6 @@
     <ClInclude Include="Sources\Interface\ModelInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Model\Model\Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Model\Model\Class.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Model\Model\Components\CodeFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Model\Model\Components\Component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -334,9 +412,6 @@
     <ClInclude Include="Sources\Model\Model\Components\Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Model\Model\Components\PureFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Model\Model\Components\Variable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -344,6 +419,36 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Model\Compiler\Compiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Uic\ui_ComponentProperties.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Uic\ui_ProcessProperties.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Uic\ui_CompositionProperties.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Uic\ui_VariableProperties.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Build\temp\$(PlatformName)\$(ConfigurationName)\Uic\ui_FunctionProperties.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Model\Model\Components\Function.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Model\Model\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Model\TypesManager\Type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\App.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PropertyTrees.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

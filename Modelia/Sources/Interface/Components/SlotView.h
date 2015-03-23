@@ -21,11 +21,10 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-	
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
-	void ownerChange();
+	void update();
 	QPointF linkConnectionPos() const;
 
 	Model::Slot * model();

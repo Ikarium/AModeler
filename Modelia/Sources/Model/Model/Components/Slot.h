@@ -2,7 +2,7 @@
 
 #include "Interface/Components/SlotView.h"
 
-#include "Model/Model/Class.h"
+#include "Model/TypesManager/Type.h"
 
 namespace Model
 {
@@ -19,9 +19,8 @@ public:
 	/**************************
 	PropertyTrees
 	***************************/
-	PropertyTree get() const;
-
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	void setLinks();
 
@@ -45,7 +44,7 @@ public:
 	/**************************
 	Setter
 	***************************/
-	void pos(int pos);
+	void setPos(int pos);
 	void setName(QString &);
 	void setViewDeleted();
 

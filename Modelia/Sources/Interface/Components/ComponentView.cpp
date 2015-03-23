@@ -1,9 +1,14 @@
 #include "ComponentView.h"
 
+#include "ui_ComponentProperties.h"
+
+#include "KExpandableWidget.h"
+
 #include "Model/Model/Components/Component.h"
 #include "Model/Model/Components/Composition.h"
 
 #include <QFormLayout>
+#include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -24,7 +29,10 @@ public:
 	Model::Component * model;
 
 	QSizeF size;
+
 	QWidget* propertiesWidget = nullptr;
+	KExpandableWidget* componentPropertiesWidget = nullptr;
+	bool componentPropertiesWidgetOpen = true;
 
 	Impl(ComponentView *, Model::Component *);
 	~Impl();
@@ -46,7 +54,7 @@ ComponentView::Impl::~Impl()
 ComponentView::ComponentView(Model::Component * model, PropertyTree & ptree)
 	: m(new Impl(this, model))
 {
-	set(ptree);
+	import(ptree);
 
 	setFlag(QGraphicsItem::ItemIsMovable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -62,6 +70,8 @@ ComponentView::ComponentView(Model::Component * model, PropertyTree & ptree)
 
 ComponentView::~ComponentView()
 {
+	removePropertiesWidget();
+
 	if (m->model)
 	{
 		for (Model::Slot & input : m->model->inputs())
@@ -72,19 +82,6 @@ ComponentView::~ComponentView()
 		{
 			output.setViewDeleted();
 		}
-	}
-}
-
-void clearLayout(QLayout *layout)
-{
-	QLayoutItem *child;
-	while ((child = layout->takeAt(0)) != 0) {
-		if (child->layout() != 0)
-			clearLayout(child->layout());
-		else if (child->widget() != 0)
-			delete child->widget();
-
-		delete child;
 	}
 }
 
@@ -101,16 +98,16 @@ void ComponentView::init()
 void ComponentView::updateSlots()
 {
 	for (Model::Slot & input : m->model->inputs())
-		input.view()->ownerChange();
+		input.view()->update();
 	for (Model::Slot & output : m->model->outputs())
-		output.view()->ownerChange();
+		output.view()->update();
 }
 
 
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree ComponentView::get() const
+PropertyTree ComponentView::export() const
 {
 	PropertyTree ptree;
 
@@ -122,7 +119,7 @@ PropertyTree ComponentView::get() const
 
 	return ptree;
 }
-void ComponentView::set(PropertyTree & ptree)
+void ComponentView::import(PropertyTree & ptree)
 {
 	setPos(QPoint(0, 0));
 	m->size = QSize(100, 100);
@@ -140,7 +137,6 @@ void ComponentView::set(PropertyTree & ptree)
 Model::Component * ComponentView::model() { return m->model; }
 QSizeF const & ComponentView::size() const { return m->size; }
 void ComponentView::setSize(QSizeF const & _size) { m->size = _size; }
-QWidget* ComponentView::propertiesWidget() const { return m->propertiesWidget; }
 QIcon ComponentView::getIcon() { return getIllustration(); }
 
 void ComponentView::paint(QPainter *painter, const QStyleOptionGraphicsItem *options, QWidget *widget)
@@ -215,6 +211,11 @@ QVariant ComponentView::itemChange(GraphicsItemChange change, const QVariant &va
 	return QGraphicsItem::itemChange(change, value);
 }
 
+QWidget* ComponentView::propertiesWidget() const
+{ 
+	return m->propertiesWidget; 
+}
+
 void ComponentView::setPropertiesWidget(QWidget* propertiesWidget_)
 {
 	m->propertiesWidget = propertiesWidget_;
@@ -222,22 +223,24 @@ void ComponentView::setPropertiesWidget(QWidget* propertiesWidget_)
 
 void ComponentView::fillPropertiesWidget()
 {
-	QGridLayout *mainLayout = new QGridLayout;
-	m->propertiesWidget->setLayout(mainLayout);
-	mainLayout->setSizeConstraint(QLayout::SetMaximumSize);
+	m->componentPropertiesWidget = new KExpandableWidget("Component", m->componentPropertiesWidgetOpen);
+	Ui::ComponentProperties ui;
+	ui.setupUi(m->componentPropertiesWidget->content());
 
-	QGroupBox * fields = new QGroupBox("Properties");
-	QFormLayout *fieldsLayout = new QFormLayout();
-	propertyWidgetElements.name = new QLineEdit(m->model->name(), m->propertiesWidget);
-	fieldsLayout->addRow("Name:", propertyWidgetElements.name);
-	connect(propertyWidgetElements.name, SIGNAL(editingFinished()), this, SLOT(nameValidator()));
-	QPushButton * deleteComponentBtn = new QPushButton("Delete component");
-	deleteComponentBtn->setObjectName(m->model->name());
-	fieldsLayout->addRow("", deleteComponentBtn);
-	connect(deleteComponentBtn, SIGNAL(clicked()), m->model->owner()->view(), SLOT(deleteComponent()));
-	fields->setLayout(fieldsLayout);
-	mainLayout->addWidget(fields, 0, 0);
+	ui.name->setText(m->model->name());
+	ui.deleteComponent->setObjectName(m->model->name());
 
+	connect(ui.name, SIGNAL(editingFinished()), this, SLOT(nameValidator()));
+	connect(ui.deleteComponent, SIGNAL(clicked()), m->model->owner()->view(), SLOT(deleteComponent()));
+
+	m->propertiesWidget->layout()->addWidget(m->componentPropertiesWidget);
+}
+
+void ComponentView::savePropertyWidget()
+{
+	if (m->componentPropertiesWidget)
+		m->componentPropertiesWidgetOpen = m->componentPropertiesWidget->open();
+	m->componentPropertiesWidget = nullptr;
 }
 
 void ComponentView::nameValidator()

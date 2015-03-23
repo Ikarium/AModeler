@@ -19,9 +19,8 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-	
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	Model::Link * model();
 

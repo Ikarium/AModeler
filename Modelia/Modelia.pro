@@ -20,3 +20,4 @@ OBJECTS_DIR += debug
 UI_DIR += ./Build/temp/$(PlatformName)/$(ConfigurationName)/Uic
 RCC_DIR += ./Build/temp/$(PlatformName)/$(ConfigurationName)/Rcc
 include(Modelia.pri)
+

@@ -6,6 +6,7 @@
 #include "Variable.h"
 #include "Link.h"
 #include "Composition.h"
+#include "Model/TypesManager/TypesLibrary.h"
 
 namespace Model
 {
@@ -19,7 +20,7 @@ public:
 
 	Interface::SlotView * view = nullptr;
 	SlotType slotType;
-	Type type;
+	Type* type = nullptr;
 	uint pos;
 	Component* owner;
 	QString name;
@@ -47,7 +48,7 @@ Slot::Impl::~Impl()
 Slot::Slot(Component * owner, PropertyTree & ptree)
 	: m(new Impl(this, owner, ptree))
 {
-	set(ptree);
+	import(ptree);
 }
 
 Slot::~Slot()
@@ -67,7 +68,7 @@ Slot::~Slot()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree Slot::get() const
+PropertyTree Slot::export() const
 {
 	PropertyTree ptree;
 
@@ -76,14 +77,15 @@ PropertyTree Slot::get() const
 	ptree.put("Name", m->name.toStdString());
 	ptree.put("Pos", m->pos);
 	ptree.put("SlotType", (m->slotType == SlotType::input) ? "Input" : "Output");
-	ptree.put_child("Type", m->type.get());
 
-	ptree.put_child("View", m->view->get());
+	ptree.put("Type", m->type->getPath().toStdString());
+
+	ptree.put_child("View", m->view->export());
 
 	return ptree;
 }
 
-void Slot::set(PropertyTree & ptree)
+void Slot::import(PropertyTree & ptree)
 {
 	checkHierarchy("Slot",
 		QString::fromStdString(ptree.get_value<std::string>()));
@@ -94,7 +96,7 @@ void Slot::set(PropertyTree & ptree)
 	m->slotType = QString::fromStdString(ptree.get<std::string>("SlotType")) == "Input"
 					? SlotType::input 
 					: SlotType::output;
-	m->type = Type(ptree.get_child("Type"));
+	m->type = App::typesLibrary->usePath(QString::fromStdString(ptree.get<std::string>("Type")));
 
 }
 
@@ -103,7 +105,7 @@ Getter
 ***************************/
 
 QString const & Slot::name() const { return m->name; }
-Type const & Slot::type() const { return m->type; }
+Type const & Slot::type() const { return *m->type; }
 int const Slot::pos() const { return m->pos; }
 Component const * Slot::owner() const { return m->owner; }
 Component* Slot::owner() { return m->owner; }
@@ -137,8 +139,8 @@ Slot* Slot::linkedUniqueSlot()
 Setter
 ***************************/
 
-void Slot::pos(int pos) { pos = pos; }
-void Slot::setName(QString & name) { name = name; }
+void Slot::setPos(int pos) { m->pos = pos; }
+void Slot::setName(QString & name) { m->name = name; }
 void Slot::setViewDeleted() { m->view = nullptr; }
 
 bool Slot::canLink() { return (!m->uniqueLink || m->links.size() == 0); }

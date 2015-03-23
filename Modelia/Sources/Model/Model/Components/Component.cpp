@@ -19,8 +19,7 @@ public:
 	Impl(Component*, Composition *, PropertyTree &);
 	~Impl();
 
-	void recalcOutputPos();
-	void recalcInputPos();
+	void recalcSlotsPos();
 
 };
 
@@ -38,7 +37,7 @@ Component::Impl::~Impl()
 Component::Component(Composition * owner, PropertyTree & ptree)
 	: m(new Impl(this, owner, ptree))
 {
-	set(ptree);
+	import(ptree);
 }
 
 Component::~Component() {}
@@ -47,7 +46,7 @@ Component::~Component() {}
 PropertyTrees
 ***************************/
 
-PropertyTree Component::get() const
+PropertyTree Component::export() const
 {
 	PropertyTree ptree;
 
@@ -56,7 +55,7 @@ PropertyTree Component::get() const
 
 	return ptree;
 }
-void Component::set(PropertyTree & ptree)
+void Component::import(PropertyTree & ptree)
 {
 	checkHierarchy("Component", QString::fromStdString(ptree.get_value<std::string>()));
 
@@ -74,102 +73,13 @@ List<Slot> const &  Component::inputs()	const	{ return m->inputs; }
 List<Slot> const &  Component::outputs() const	{ return m->outputs; }
 
 /**************************
-inputs accessors
+slots accessors
 ***************************/
-List<Slot> & Component::inputs()
-{
-	return m->inputs;
-}
-
-Slot * Component::addInput(PropertyTree & ptree)
-{
-	m->inputs.emplace_back(this, ptree);
-	m->recalcInputPos();
-	return &m->inputs.back();
-}
-
-void Component::removeInput(Slot * slot)
-{
-	m->inputs.erase(findInputSlot(slot));
-	m->recalcInputPos();
-}
-
-List<Slot>::const_iterator
-Component::findInputSlot(Slot * slot)
-{
-	if (slot->owner() != this) KThrow(ModeliaExection, lvl6, "Slot is not owned by this component");
-	for (List<Slot>::const_iterator iter = m->inputs.cbegin();
-		iter != m->inputs.cend(); iter++)
-		if (*slot == *iter) return iter;
-
-	KThrow(ModeliaExection, lvl7, "Slot not found");
-
-}
-
-Slot * Component::findInputSlot(QString name)
-{
-	for (Slot & current : m->inputs)
-		if (current.name() == name) return &current;
-
-	return nullptr;
-
-}
-
-void Component::Impl::recalcInputPos()
-{
-	int i = 0;
-	for (List<Slot>::iterator iter = inputs.begin();
-		iter != inputs.cend(); iter++)
-		iter->pos(i++);
-}
-
-/**************************
-outputs accessors
-***************************/
-
-List<Slot> & Component::outputs()
-{
-	return m->outputs;
-}
-
 Slot * Component::addOutput(PropertyTree & ptree)
 {
 	m->outputs.emplace_back(this, ptree);
-	m->recalcOutputPos();
+	m->recalcSlotsPos();
 	return &m->outputs.back();
-}
-
-void Component::removeOutput(Slot * elem)
-{
-	m->outputs.erase(findOutputSlot(elem));
-	m->recalcOutputPos();
-}
-
-List<Slot>::const_iterator
-Component::findOutputSlot(Slot * slot)
-{
-	if (slot->owner() != this) KThrow(ModeliaExection, lvl6, "Slot is not owned by this component");
-	for (List<Slot>::const_iterator iter = m->outputs.cbegin();
-		iter != m->outputs.cend(); iter++)
-		if (*slot == *iter) return iter;
-
-	KThrow(ModeliaExection, lvl7, "Slot not found");
-}
-
-Slot * Component::findOutputSlot(QString name)
-{
-	for (Slot & current : m->outputs)
-		if (current.name() == name) return &current;
-
-	return nullptr;
-}
-
-void Component::Impl::recalcOutputPos()
-{
-	int i = 0;
-	for (List<Slot>::iterator iter = outputs.begin();
-		iter != outputs.cend(); iter++)
-		iter->pos(i++);
 }
 
 Slot * Component::findSlot(QString name)
@@ -185,15 +95,45 @@ Slot * Component::findSlot(QString name)
 	return nullptr;
 }
 
-void Component::removeSlot(Slot * slot)
+List<Slot> & Component::inputs()
 {
-	m->outputs.remove(*slot);
-	m->inputs.remove(*slot);
-	m->recalcOutputPos();
-	m->recalcInputPos();
+	return m->inputs;
 }
 
+Slot * Component::addInput(PropertyTree & ptree)
+{
+	m->inputs.emplace_back(this, ptree);
+	m->recalcSlotsPos();
+	return &m->inputs.back();
+}
 
+List<Slot> & Component::outputs()
+{
+	return m->outputs;
+}
+
+void Component::removeSlot(Slot * slot)
+{
+	m->outputs.remove_if([slot](Slot & t){ return &t == slot; });
+	m->inputs.remove_if([slot](Slot & t){ return &t == slot; });
+	m->recalcSlotsPos();
+}
+
+void Component::Impl::recalcSlotsPos()
+{
+	int i = 0;
+	for (List<Slot>::iterator iter = outputs.begin();
+		iter != outputs.cend(); iter++)
+		iter->setPos(i++);
+	i = 0;
+	for (List<Slot>::iterator iter = inputs.begin();
+		iter != inputs.cend(); iter++)
+		iter->setPos(i++);
+}
+
+/**************************
+operators accessors
+***************************/
 Component::operator QString() const
 {
 	return m->name;
@@ -209,18 +149,17 @@ bool Component::operator != (Component const & comp) const
 	return comp.name() != m->name;
 }
 
+
 void checkHierarchy(QString const & base, QString const & given)
 {
 	if (base == given) return;
 	if (base == "Component" &&
 		(given == "Variable" ||
 		given == "Process" ||
-		given == "PureFunction" ||
-		given == "CodeFunction" ||
+		given == "Function" ||
 		given == "Composition")) return;
 	if (base == "Process" &&
-		(given == "PureFunction" ||
-		given == "CodeFunction" ||
+		(given == "Function" ||
 		given == "Composition")) return;
 
 	QString error = "Bad property tree, needed '" + base + "', given '" + given + "'";

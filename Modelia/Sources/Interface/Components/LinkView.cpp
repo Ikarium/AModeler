@@ -37,7 +37,7 @@ LinkView::Impl::~Impl()
 LinkView::LinkView(Model::Link * model, PropertyTree & ptree)
 	: m(new Impl(this, model))
 {
-	set(ptree);
+	import(ptree);
 	QPen pen;
 	pen.setWidth(4);
 	pen.setBrush(Qt::green);
@@ -57,14 +57,14 @@ LinkView::~LinkView()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree LinkView::get() const
+PropertyTree LinkView::export() const
 {
 	PropertyTree ptree;
 
 	return ptree;
 }
 
-void LinkView::set(PropertyTree & ptree)
+void LinkView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{

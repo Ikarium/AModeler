@@ -7,28 +7,28 @@
 namespace Interface
 {
 
-class CompositionView : public ProcessView
+class FunctionView : public ProcessView
 {
 	Q_OBJECT
 
 public:
 
-	CompositionView(Model::Composition *, PropertyTree &);
-	~CompositionView();
-
-	/**************************
-	PropertyTrees
-	***************************/
+	FunctionView(Model::Function *, PropertyTree &);
+	~FunctionView();
+	
+/**************************
+PropertyTrees
+***************************/
 	PropertyTree export() const;
 	void import(PropertyTree & ptree);
 
-	Model::Composition * model();
+	Model::Function * model();
 
 	virtual void fillPropertiesWidget() override;
 	virtual void savePropertyWidget() override;
 
 public slots:
-	void iterationCountUpdate(int);
+	void codeEdited();
 
 private:
 	class Impl;

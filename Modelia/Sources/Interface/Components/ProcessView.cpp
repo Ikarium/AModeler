@@ -2,9 +2,14 @@
 
 #include "ProcessView.h"
 
-#include "Model/Model/Components/Process.h"
+#include "ui_ProcessProperties.h"
 
-#include <QFormLayout>
+#include "KExpandableWidget.h"
+
+#include "Model/Model/Components/Process.h"
+#include "Model/TypesManager/TypesLibrary.h"
+
+#include <QBitMap>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -22,6 +27,9 @@ class ProcessView::Impl
 public:
 
 	Model::Process * model;
+
+	KExpandableWidget* processPropertiesWidget = nullptr;
+	bool processPropertiesWidgetOpen = true;
 
 	Impl(ProcessView *, Model::Process *);
 	~Impl();
@@ -43,7 +51,7 @@ ProcessView::Impl::~Impl()
 ProcessView::ProcessView(Model::Process * model, PropertyTree & ptree)
 	: m(new Impl(this, model)), ComponentView(static_cast<Model::Process*>(model), ptree)
 {
-	set(ptree);
+	import(ptree);
 }
 
 ProcessView::~ProcessView()
@@ -54,14 +62,14 @@ ProcessView::~ProcessView()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree ProcessView::get() const
+PropertyTree ProcessView::export() const
 {
-	PropertyTree ptree = ComponentView::get();
+	PropertyTree ptree = ComponentView::export();
 
 	return ptree;
 }
 
-void ProcessView::set(PropertyTree & ptree)
+void ProcessView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{
@@ -104,45 +112,74 @@ void ProcessView::fillPropertiesWidget()
 {
 	ComponentView::fillPropertiesWidget();
 
-	QGroupBox * inputs = new QGroupBox("Inputs");
-	QGridLayout * inputsLayout = new QGridLayout();
+	Ui::ProcessProperties ui;
+	m->processPropertiesWidget = new KExpandableWidget("Process", m->processPropertiesWidgetOpen);
+	ui.setupUi(m->processPropertiesWidget->content());
+
+	QPixmap tmp = QPixmap("Sources/Ressources/Icons/draft.png");
+	QPixmap deletePixmap(tmp.size());
+	deletePixmap.fill("#916063");
+	deletePixmap.setMask(tmp.createMaskFromColor(Qt::transparent));
+	deletePixmap = deletePixmap.scaledToHeight(13, Qt::SmoothTransformation);
+
+	QGridLayout* layout = new QGridLayout();
 	int i = 0;
 	for (Model::Slot & input : m->model->inputs())
 	{
-		QLineEdit * inputLineEdit = new QLineEdit(input.name(), propertiesWidget());
+		QLineEdit * inputLineEdit = new QLineEdit(input.name());
 		inputLineEdit->setObjectName(input.name());
-		inputsLayout->addWidget(inputLineEdit, i, 1);
+		inputLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(inputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
-		QPushButton * deleteInputBtn = new QPushButton("delete");
+		layout->addWidget(inputLineEdit, i, 0, 1, 3, Qt::AlignTop);
+
+		QPushButton * deleteInputBtn = new QPushButton(QIcon(deletePixmap), "");
 		deleteInputBtn->setObjectName(input.name());
-		inputsLayout->addWidget(deleteInputBtn, i, 2);
+		deleteInputBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(deleteInputBtn, SIGNAL(clicked()), this, SLOT(deleteSlot()));
+		layout->addWidget(deleteInputBtn, i, 3, 1, 1, Qt::AlignTop);
 		i++;
 	}
-	inputs->setLayout(inputsLayout);
-	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(inputs, 0, 1);
+	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Preferred, QSizePolicy::Expanding), i, 0);
+	ui.inputs->setLayout(layout);
 
-	QGroupBox * outputs = new QGroupBox("Outputs");
-	QGridLayout * outputsLayout = new QGridLayout();
 	i = 0;
+	layout = new QGridLayout();
 	for (Model::Slot & output : m->model->outputs())
 	{
-		QLineEdit * outputLineEdit = new QLineEdit(output.name(), propertiesWidget());
+		QLineEdit * outputLineEdit = new QLineEdit(output.name());
 		outputLineEdit->setObjectName(output.name());
-		outputsLayout->addWidget(outputLineEdit, i, 1);
+		outputLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(outputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
-		QPushButton * deleteOutputBtn = new QPushButton("delete");
+		layout->addWidget(outputLineEdit, i, 0, 1, 3, Qt::AlignTop);
+
+		QPushButton * deleteOutputBtn = new QPushButton(QIcon(deletePixmap), "");
 		deleteOutputBtn->setObjectName(output.name());
-		outputsLayout->addWidget(deleteOutputBtn, i, 2);
-		connect(deleteOutputBtn, SIGNAL(clicked()), this, SLOT(deleteSlot()));
+		deleteOutputBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+		connect(deleteOutputBtn, SIGNAL(clicked()), this, SLOT(deleteSlot()));		
+		layout->addWidget(deleteOutputBtn, i, 3, 1, 1, Qt::AlignTop);
+
 		i++;
 	}
-	QPushButton * addNewOutputBtn = new QPushButton("Add new output");
-	outputsLayout->addWidget(addNewOutputBtn, outputsLayout->rowCount(), 1, 2, 1);
-	outputs->setLayout(outputsLayout);
-	connect(addNewOutputBtn, SIGNAL(clicked()), this, SLOT(addNewOutput()));
-	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(outputs, 0, 2);
 
+	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Preferred, QSizePolicy::Expanding), i, 0);
+
+	QPushButton * addNewOutputBtn = new QPushButton("Add");
+	connect(addNewOutputBtn, SIGNAL(clicked()), this, SLOT(addNewOutput()));
+
+	layout->addWidget(addNewOutputBtn, i+1, 0, 1, 4, Qt::AlignTop);
+	ui.outputs->setLayout(layout);
+
+	propertiesWidget()->layout()->addWidget(m->processPropertiesWidget);
+
+}
+
+void ProcessView::savePropertyWidget()
+{
+	ComponentView::savePropertyWidget();
+
+	if (m->processPropertiesWidget)
+		m->processPropertiesWidgetOpen = m->processPropertiesWidget->open();
+	m->processPropertiesWidget = nullptr;
 }
 
 void ProcessView::slotRename()
@@ -164,14 +201,9 @@ void ProcessView::slotRename()
 
 void ProcessView::deleteSlot()
 {
-	Model::Slot * slot = m->model->findSlot(sender()->objectName());
+	m->model->removeSlot(m->model->findSlot(sender()->objectName()));
 
-	if (slot->slotType() == Model::SlotType::input)
-		m->model->removeInput(slot);
-	else m->model->removeOutput(slot);
-	clearLayout(propertiesWidget()->layout());
-	delete propertiesWidget()->layout();
-	fillPropertiesWidget();
+	updatePropertiesWidget();
 
 	updateSlots();
 
@@ -190,13 +222,12 @@ Model::Slot * ProcessView::addNewOutput()
 	ptree.put("Name", name.toStdString());
 	ptree.put("UniqueLink", false);
 	ptree.put("SlotType", "Output");
-	ptree.put_child("Type", simpleType());
+	ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
 
 	Model::Slot * slot = m->model->addOutput(ptree);
 	slot->view()->setParentItem(this);
-	clearLayout(propertiesWidget()->layout());
-	delete propertiesWidget()->layout();
-	fillPropertiesWidget();
+
+	updatePropertiesWidget();
 
 	updateSlots();
 
@@ -216,19 +247,11 @@ Model::Slot * ProcessView::addNewInput()
 	ptree.put("Name", name.toStdString());
 	ptree.put("UniqueLink", true);
 	ptree.put("SlotType", "Input");
-	ptree.put_child("Type", simpleType());
+	ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
 
 	Model::Slot * slot = m->model->addInput(ptree);
 	slot->view()->setParentItem(this);
-	if (propertiesWidget())
-	{
-		if (propertiesWidget()->layout())
-		{
-			clearLayout(propertiesWidget()->layout());
-			delete propertiesWidget()->layout();
-		}
-		fillPropertiesWidget();
-	}
+	updatePropertiesWidget();
 
 	updateSlots();
 

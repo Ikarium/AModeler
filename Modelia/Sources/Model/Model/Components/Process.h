@@ -18,14 +18,18 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
-	void set(PropertyTree &);
+/**************************
+Slot accessors
+***************************/
+	virtual Slot * addInput(PropertyTree &) override;
+	virtual Slot * addOutput(PropertyTree &) override;
 
-	Slot * addInput(PropertyTree &);
-
-	Slot * addOutput(PropertyTree &);
-
+/**************************
+Accessors
+***************************/
 	virtual Interface::ComponentView * view() override = 0;
 
 private:

@@ -6,13 +6,13 @@
 
 namespace Interface
 {
-class LibraryView : public QTreeView
+class ComponentsLibraryView : public QTreeView
 {
 	Q_OBJECT
 
 public:
-	LibraryView(QWidget * = nullptr);
-	~LibraryView();
+	ComponentsLibraryView(QWidget * = nullptr);
+	~ComponentsLibraryView();
 
 	void dragEnterEvent(QDragEnterEvent *);
 	void dragMoveEvent(QDragMoveEvent *);

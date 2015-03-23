@@ -40,7 +40,7 @@ SlotView::Impl::~Impl()
 SlotView::SlotView(Model::Slot * model, PropertyTree & ptree)
 	: m(new Impl(this, model))
 {
-	set(ptree);
+	import(ptree);
 
 	setAcceptHoverEvents(true);
 }
@@ -58,14 +58,14 @@ Model::Slot * SlotView::model()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree SlotView::get() const
+PropertyTree SlotView::export() const
 {
 	PropertyTree ptree;
 
 	return ptree;
 }
 
-void SlotView::set(PropertyTree & ptree)
+void SlotView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{
@@ -74,11 +74,12 @@ void SlotView::set(PropertyTree & ptree)
 
 }
 
-void SlotView::ownerChange()
+void SlotView::update()
 {
 	ComponentView * componentView = m->model->owner()->view();
 	setParentItem(componentView);
 	setToolTip(m->model->name());
+	
 
 	int slotCount;
 	if (m->model->slotType() == Model::SlotType::input)

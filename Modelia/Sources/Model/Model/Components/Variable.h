@@ -13,24 +13,23 @@ class Variable : public Component
 public:
 	Variable(Composition *, PropertyTree &);
 
-	/**************************
-	PropertyTrees
-	***************************/
-	PropertyTree get() const;
-	void set(PropertyTree &);
+/**************************
+PropertyTrees
+***************************/
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
-	/**************************
-	inputs accessors
-	***************************/
-	void addInput(PropertyTree &);
+/**************************
+Slot accessors
+***************************/
+	virtual Slot * addInput(PropertyTree &) override;
+	virtual Slot * addOutput(PropertyTree &) override;
+
 	void removeInput();
-
-
-	/**************************
-	outputs accessors
-	***************************/
-	void addOutput(PropertyTree &);
 	void removeOutput();
+
+	QString initialValue();
+	void setInitialValue(QString);
 
 	virtual Interface::VariableView * view() override;
 

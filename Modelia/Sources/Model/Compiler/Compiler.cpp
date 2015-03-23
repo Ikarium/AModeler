@@ -3,8 +3,7 @@
 #include "Compiler.h"
 #include "Model/Model/Components/Variable.h"
 #include "Model/Model/Components/Composition.h"
-#include "Model/Model/Components/CodeFunction.h"
-#include "Model/Model/Components/PureFunction.h"
+#include "Model/Model/Components/Function.h"
 #include "Model/Model/Components/Slot.h"
 #include "Model/Model/Components/Link.h"
 
@@ -23,9 +22,8 @@ public:
 
 	~Impl();
 
-	QString compileCodeFunction(CodeFunction *, uint8 = 0);
+	QString compileFunction(Function *, uint8 = 0);
 	QString compileComposition(Composition *, uint8 = 0);
-	QString compilePureFunction(PureFunction *, uint8 = 0);
 
 };
 
@@ -85,7 +83,10 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 	if (cycle) return "Cycle !";
 
 	for (Variable* variable : variablesList)
-		stream << tab << variable->name() + " = None" << endl;
+		if (variable->initialValue() != "")
+			stream << tab << variable->name() + " = " + variable->initialValue() << endl;
+		else
+			stream << tab << variable->name() + " = None" << endl;
 
 	for (Process* process : processList)
 	{
@@ -107,11 +108,11 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 		if (dynamic_cast<Composition*>(process))
 			stream	<< compileComposition(dynamic_cast<Composition*>(process), tabCount + 1)
 					<< endl;
-		else if (dynamic_cast<CodeFunction*>(process))
-			stream	<< compileCodeFunction(dynamic_cast<CodeFunction*>(process), tabCount + 1)
+		else if (dynamic_cast<Function*>(process))
+			stream	<< compileFunction(dynamic_cast<Function*>(process), tabCount + 1)
 					<< endl;
-		else if (dynamic_cast<PureFunction*>(process))
-			stream	<< compilePureFunction(dynamic_cast<PureFunction*>(process), tabCount + 1)
+		else if (dynamic_cast<Function*>(process))
+			stream	<< compileFunction(dynamic_cast<Function*>(process), tabCount + 1)
 					<< endl;
 
 		stream << tab << "\t" << "return (";
@@ -195,7 +196,7 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 	return result;
 }
 
-QString Compiler::Impl::compileCodeFunction(CodeFunction * codeFunction, uint8 tabCount)
+QString Compiler::Impl::compileFunction(Function * codeFunction, uint8 tabCount)
 {
 	QString result;
 	QTextStream stream(&result);
@@ -212,26 +213,11 @@ QString Compiler::Impl::compileCodeFunction(CodeFunction * codeFunction, uint8 t
 	return result;
 }
 
-QString Compiler::Impl::compilePureFunction(PureFunction * pureFunction, uint8 tabCount)
-{
-	QString result;
-	QTextStream stream(&result);
-
-	QString tab = "";
-	for (int i = 0; i < tabCount; i++)
-		tab += "\t";
-
-	return result;
-}
-
-
 QVector<Process*> Compiler::topSort(Composition * root, bool &cycle)
 {
 	QVector<Process*> result;
 
-	for (Process & current : root->codeFunctions())
-		result << &current;
-	for (Process & current : root->pureFunctions())
+	for (Process & current : root->functions())
 		result << &current;
 	for (Process & current : root->compositions())
 		result << &current;

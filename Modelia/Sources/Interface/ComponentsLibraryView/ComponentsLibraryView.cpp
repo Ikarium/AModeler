@@ -1,15 +1,15 @@
-#include "LibraryView.h"
+#include "ComponentsLibraryView.h"
 
 #include<QDropEvent>
 #include<QDrag>
 #include<QMimeData>
 
-#include "Model/Library/Library.h"
+#include "Model/ComponentsLibrary/ComponentsLibrary.h"
 
 namespace Interface
 {
 
-LibraryView::LibraryView(QWidget * parent) : QTreeView(parent)
+ComponentsLibraryView::ComponentsLibraryView(QWidget * parent) : QTreeView(parent)
 {
 	setSelectionMode(QAbstractItemView::SingleSelection);
 	setDragEnabled(true);
@@ -19,13 +19,13 @@ LibraryView::LibraryView(QWidget * parent) : QTreeView(parent)
 }
 
 
-LibraryView::~LibraryView()
+ComponentsLibraryView::~ComponentsLibraryView()
 {
 
 }
 
 
-void LibraryView::dragEnterEvent(QDragEnterEvent *event)
+void ComponentsLibraryView::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (event->mimeData()->hasFormat("application/modelia/component"))
 		event->accept();
@@ -33,7 +33,7 @@ void LibraryView::dragEnterEvent(QDragEnterEvent *event)
 		event->ignore();
 }
 
-void LibraryView::dragMoveEvent(QDragMoveEvent *event)
+void ComponentsLibraryView::dragMoveEvent(QDragMoveEvent *event)
 {
 	if (event->mimeData()->hasFormat("application/modelia/component")) {
 		event->setDropAction(Qt::CopyAction);
@@ -44,17 +44,17 @@ void LibraryView::dragMoveEvent(QDragMoveEvent *event)
 	}
 }
 
-void LibraryView::dragLeaveEvent(QDragLeaveEvent *event)
+void ComponentsLibraryView::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	event->ignore();
 }
 
-void LibraryView::dropEvent(QDropEvent *event)
+void ComponentsLibraryView::dropEvent(QDropEvent *event)
 {
 	event->ignore();
 }
 
-void LibraryView::startDrag(Qt::DropActions supportedActions)
+void ComponentsLibraryView::startDrag(Qt::DropActions supportedActions)
 {
 	QMimeData* mimeData = model()->mimeData(selectedIndexes());
 

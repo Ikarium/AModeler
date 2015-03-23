@@ -13,9 +13,8 @@ class PureFunction : public Process
 public:
 	PureFunction(Composition *, PropertyTree &);
 
-	PropertyTree get() const;
-
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	QString & code();
 	void code(QString const &);

@@ -3,14 +3,19 @@
 
 #include "SceneManager.h"
 #include "SceneView.h"
-#include "LibraryView/LibraryView.h"
+#include "ComponentsLibraryView/ComponentsLibraryView.h"
 
-#include "Model/Library/Library.h"
+#include "TypesManagerView/TypeEditor.h"
+
+#include "Model/TypesManager/TypesLibrary.h"
+#include "Model/ComponentsLibrary/ComponentsLibrary.h"
 #include "Model/Compiler/Compiler.h"
 
 #include "ModelInterface.h"
 
 #include <QFileDialog>
+#include <QLabel>
+#include <QToolBox>
 
 namespace Interface
 {
@@ -27,7 +32,7 @@ public:
 
 	Ui::MainWindow* ui;
 	SceneManager sceneManager;
-	Model::Library libraryModel;
+	Model::ComponentsLibrary componentsLibraryModel;
 
 	Impl(MainWindow* owner_);
 
@@ -42,13 +47,19 @@ MainWindow::Impl::Impl(MainWindow* owner_) :	owner(owner_),
 	modelInterface.loadModel("Default.model");
 
 	ui->setupUi(owner);
-	sceneManager.init(ui->ToolBar, ui->NavBar, ui->Properties);
+
+	new Model::TypesLibrary();
+
+	sceneManager.init(ui->ToolBar, ui->NavBar, ui->PropertiesWidget);
 	sceneManager.setCurrentComposition(&modelInterface.model()->root());
 
 	ui->SceneView->setScene(&sceneManager);
 	ui->SceneView->show();
 
-	ui->LibraryView->setModel(&libraryModel);
+	ui->ComponentsLibraryView->setModel(&componentsLibraryModel);
+	ui->TypesLibraryView->setModel(App::typesLibrary);
+	ui->TypesLibraryView->setTypeEditor(ui->TypeEditor);
+
 
 
 }
@@ -106,7 +117,7 @@ void MainWindow::loadLibrary()
 
 	if (fileName != "")
 	{
-		m->libraryModel.populate(fileName);
+		m->componentsLibraryModel.populate(fileName);
 	}
 }
 
@@ -117,7 +128,7 @@ void MainWindow::saveLibrary()
 
 	if (fileName != "")
 	{
-		m->libraryModel.save(fileName);
+		m->componentsLibraryModel.save(fileName);
 	}
 }
 
@@ -128,7 +139,7 @@ void MainWindow::compile()
 
 void MainWindow::addToLibrary()
 {
-	m->libraryModel.addUserElem(sender()->objectName());
+	m->componentsLibraryModel.addUserElem(sender()->objectName());
 }
 
 

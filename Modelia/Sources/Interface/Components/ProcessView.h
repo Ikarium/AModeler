@@ -16,9 +16,8 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	Model::Process * model();
 
@@ -29,6 +28,7 @@ private:
 
 public:
 	virtual void fillPropertiesWidget() override;
+	virtual void savePropertyWidget() override;
 
 public slots:
 	void slotRename();

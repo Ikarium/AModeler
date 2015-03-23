@@ -17,16 +17,15 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-
-	void set(PropertyTree & ptree);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 /**************************
 Getters
 ***************************/
+	List<Component*>		components();
 	List<Variable>		&	variables();
-	List<PureFunction>	&	pureFunctions();
-	List<CodeFunction>	&	codeFunctions();
+	List<Function>		&	functions();
 	List<Composition>	&	compositions();
 	List<Link>			&	links();
 	uint8					iterationCount();

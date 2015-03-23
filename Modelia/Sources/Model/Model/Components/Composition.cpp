@@ -2,8 +2,7 @@
 
 #include "Composition.h"
 #include "Variable.h"
-#include "PureFunction.h"
-#include "CodeFunction.h"
+#include "Function.h"
 #include "Link.h"
 
 namespace Model
@@ -15,13 +14,11 @@ class Composition::Impl
 
 public:
 
-	Type type;
 	Interface::CompositionView view;
 
 	List<Link> links;
 	List<Variable> variables;
-	List<PureFunction> pureFunctions;
-	List<CodeFunction> codeFunctions;
+	List<Function> functions;
 	List<Composition> compositions;
 
 	uint8 iterationCount;
@@ -47,7 +44,7 @@ Composition::Impl::~Impl()
 Composition::Composition(Composition * owner, PropertyTree & ptree)
 	: m(new Impl(this, ptree)), Process(owner, ptree)
 {
-	set(ptree);
+	import(ptree);
 	m->view.init();
 }
 
@@ -59,29 +56,27 @@ Composition::~Composition()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree Composition::get() const
+PropertyTree Composition::export() const
 {
-	PropertyTree ptree = Process::get();
+	PropertyTree ptree = Process::export();
 
 	ptree.put_value("Composition");
 	ptree.put("IterationCount", m->iterationCount);
 
 	for (auto & variable : m->variables)
-		ptree.add_child("Elements.Element", variable.get());
-	for (auto & pureFunction : m->pureFunctions)
-		ptree.add_child("Elements.Element", pureFunction.get());
-	for (auto & codeFunction : m->codeFunctions)
-		ptree.add_child("Elements.Element", codeFunction.get());
+		ptree.add_child("Elements.Element", variable.export());
+	for (auto & function : m->functions)
+		ptree.add_child("Elements.Element", function.export());
 	for (auto & composition : m->compositions)
-		ptree.add_child("Elements.Element", composition.get());
+		ptree.add_child("Elements.Element", composition.export());
 	for (auto & link : m->links)
-		ptree.add_child("Links.Link", link.get());
+		ptree.add_child("Links.Link", link.export());
 
-	ptree.put_child("View", m->view.get());
+	ptree.put_child("View", m->view.export());
 
 	return ptree;
 }
-void Composition::set(PropertyTree & ptree)
+void Composition::import(PropertyTree & ptree)
 {
 	checkHierarchy("Composition", QString::fromStdString(ptree.get_value<std::string>()));
 
@@ -102,9 +97,22 @@ void Composition::set(PropertyTree & ptree)
 /**************************
 Getters
 ***************************/
+List<Component*>	Composition::components()
+{ 
+	List<Component*> result;
+
+	for (auto & variable : m->variables)
+		result.push_back(&variable);
+	for (auto & function : m->functions)
+		result.push_back(&function);
+	for (auto & composition : m->compositions)
+		result.push_back(&composition);
+
+	return result;
+}
+
 List<Variable>		&	Composition::variables() { return m->variables; }
-List<PureFunction>	&	Composition::pureFunctions() { return m->pureFunctions; }
-List<CodeFunction>	&	Composition::codeFunctions() { return m->codeFunctions; }
+List<Function>		&	Composition::functions() { return m->functions; }
 List<Composition>	&	Composition::compositions() { return m->compositions; }
 List<Link>			&	Composition::links() { return m->links; }
 uint8					Composition::iterationCount() { return m->iterationCount; }
@@ -119,15 +127,10 @@ Component* Composition::addElement(PropertyTree & ptree)
 		m->variables.emplace_back(this, ptree);
 		return &m->variables.back();
 	}
-	else if (QString::fromStdString(ptree.get_value<std::string>()) == "PureFunction")
+	else if (QString::fromStdString(ptree.get_value<std::string>()) == "Function")
 	{
-		m->pureFunctions.emplace_back(this, ptree);
-		return &m->pureFunctions.back();
-	}
-	else if (QString::fromStdString(ptree.get_value<std::string>()) == "CodeFunction")
-	{
-		m->codeFunctions.emplace_back(this, ptree);
-		return &m->codeFunctions.back();
+		m->functions.emplace_back(this, ptree);
+		return &m->functions.back();
 	}
 	else if (QString::fromStdString(ptree.get_value<std::string>()) == "Composition")
 	{
@@ -159,8 +162,7 @@ Deleter
 void Composition::removeComponent(QString const & name)
 {
 	auto check = [&name](Component & t){ return t.name() == name; };
-	m->pureFunctions.remove_if(check);
-	m->codeFunctions.remove_if(check);
+	m->functions.remove_if(check);
 	m->variables.remove_if(check);
 	m->compositions.remove_if(check);
 
@@ -175,14 +177,8 @@ Find
 ***************************/
 Component * Composition::find(QString const & name)
 {
-	for (Component & current : m->variables)
-		if (current.name() == name) return &current;
-	for (Component & current : m->codeFunctions)
-		if (current.name() == name) return &current;
-	for (Component & current : m->pureFunctions)
-		if (current.name() == name) return &current;
-	for (Component & current : m->compositions)
-		if (current.name() == name) return &current;
+	for (Component * current : components())
+		if (current->name() == name) return current;
 
 	return nullptr;
 }

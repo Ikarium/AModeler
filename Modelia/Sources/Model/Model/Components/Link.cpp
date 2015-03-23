@@ -42,7 +42,7 @@ Link::Impl::~Impl()
 Link::Link(Composition * parrent, PropertyTree & ptree)
 	: m(new Impl(this, parrent, ptree))
 {
-	set(ptree);
+	import(ptree);
 }
 
 Link::~Link()
@@ -53,7 +53,7 @@ Link::~Link()
 		m->slot2->unlink(this);
 }
 
-PropertyTree Link::get() const
+PropertyTree Link::export() const
 {
 	PropertyTree ptree;
 
@@ -80,21 +80,17 @@ PropertyTree Link::get() const
 		ptree.put("Slot2.SlotName", m->slot2->name().toStdString());
 	}
 
-	ptree.put_child("View", m->view.get());
+	ptree.put_child("View", m->view.export());
 
 	return ptree;
 }
 
-void Link::set(PropertyTree & ptree)
+void Link::import(PropertyTree & ptree)
 {
 	checkHierarchy("Link", QString::fromStdString(ptree.get_value<std::string>()));
 
 	Slot * slot1;
 	Slot * slot2;
-	qDebug() << QString::fromStdString(ptree.get<std::string>("Slot1.ComponentName"));
-	qDebug() << QString::fromStdString(ptree.get<std::string>("Slot1.SlotName"));
-	qDebug() << QString::fromStdString(ptree.get<std::string>("Slot2.ComponentName"));
-	qDebug() << QString::fromStdString(ptree.get<std::string>("Slot2.SlotName"));
 
 	if (QString::fromStdString(ptree.get<std::string>("Slot1.ComponentName")) == "__Parent")
 		slot1 = m->parrent->findSlot(

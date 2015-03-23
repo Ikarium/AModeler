@@ -2,6 +2,8 @@
 
 #include "Model/Model/Components/PureFunction.h"
 
+#include "KExpandableWidget.h"
+
 namespace Interface
 {
 
@@ -33,7 +35,7 @@ PureFunctionView::Impl::~Impl()
 PureFunctionView::PureFunctionView(Model::PureFunction * model, PropertyTree & ptree)
 	: m(new Impl(this, model)), ProcessView(static_cast<Model::Process*>(model), ptree)
 {
-	set(ptree);
+	import(ptree);
 }
 
 PureFunctionView::~PureFunctionView()
@@ -44,14 +46,14 @@ PureFunctionView::~PureFunctionView()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree PureFunctionView::get() const
+PropertyTree PureFunctionView::export() const
 {
-	PropertyTree ptree = ProcessView::get();
+	PropertyTree ptree = ProcessView::export();
 
 	return ptree;
 }
 
-void PureFunctionView::set(PropertyTree & ptree)
+void PureFunctionView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{

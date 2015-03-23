@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Class.h"
+#include "Model/TypesManager/Type.h"
 #include "Slot.h"
 
 namespace Model
@@ -22,8 +22,8 @@ public:
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree &);
 
 /**************************
 	accessors		 
@@ -33,36 +33,30 @@ PropertyTrees
 	List<Slot> const & inputs() const;
 	List<Slot> const & outputs() const;
 	Composition* owner();
+	virtual Interface::ComponentView* view() = 0;
 
 /**************************
-	inputs accessors
+slots accessors
 ***************************/
-	List<Slot> & inputs();
-	Slot * addInput(PropertyTree &);
-	void removeInput(Slot *);
-	List<Slot>::const_iterator findInputSlot(Slot *);
-	Slot * findInputSlot(QString);
-
-/**************************
-	outputs accessors
-***************************/
-	List<Slot> & outputs();
-	Slot * addOutput(PropertyTree &);
-	void removeOutput(Slot *);
-	List<Slot>::const_iterator findOutputSlot(Slot *);
-	Slot * findOutputSlot(QString);
-
 	virtual Slot * findSlot(QString);
 	void removeSlot(Slot *);
 
-	virtual Interface::ComponentView* view() = 0;
+	List<Slot> & inputs();
+	virtual Slot * addInput(PropertyTree &);
 
+	List<Slot> & outputs();
+	virtual Slot * addOutput(PropertyTree &);
+
+/**************************
+operators accessors
+***************************/
 	operator QString () const;
-
 	bool operator == (Component const &) const;
-
 	bool operator != (Component const &) const;
 
+/**************************
+PIMPL
+***************************/
 private:
 	class Impl;
 	UniquePtr<Impl> m;

@@ -1,6 +1,11 @@
 #include "VariableView.h"
 
 #include "Model/Model/Components/Variable.h"
+#include <QLineEdit>
+
+#include "ui_VariableProperties.h"
+
+#include "KExpandableWidget.h"
 
 namespace Interface
 {
@@ -12,6 +17,9 @@ namespace Interface
 public:
 
 	Model::Variable * model;
+
+	KExpandableWidget* variablePropertiesWidget = nullptr;
+	bool variablePropertiesWidgetOpen = true;
 
 	Impl(VariableView *, Model::Variable *);
 	~Impl();
@@ -33,7 +41,7 @@ VariableView::Impl::~Impl()
 VariableView::VariableView(Model::Variable * model, PropertyTree & ptree)
 	: m(new Impl(this, model)), ComponentView(static_cast<Model::Component*>(model), ptree)
 {
-	set(ptree);
+	import(ptree);
 }
 
 VariableView::~VariableView()
@@ -41,14 +49,14 @@ VariableView::~VariableView()
 
 }
 
-PropertyTree VariableView::get() const
+PropertyTree VariableView::export() const
 {
-	PropertyTree ptree = ComponentView::get();
+	PropertyTree ptree = ComponentView::export();
 
 	return ptree;
 }
 
-void VariableView::set(PropertyTree & ptree)
+void VariableView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{
@@ -59,6 +67,37 @@ void VariableView::set(PropertyTree & ptree)
 Model::Variable * VariableView::model()
 {
 	return m->model;
+}
+
+void VariableView::fillPropertiesWidget()
+{
+	ComponentView::fillPropertiesWidget();
+
+	Ui::VariableProperties ui;
+	m->variablePropertiesWidget = new KExpandableWidget("Variable", m->variablePropertiesWidgetOpen);
+	ui.setupUi(m->variablePropertiesWidget->content());
+	propertiesWidget()->layout()->addWidget(m->variablePropertiesWidget);
+
+	ui.initialValue->setText(m->model->initialValue());
+	connect(ui.initialValue, SIGNAL(editingFinished()), this, SLOT(updateInitialValue()));
+}
+
+void VariableView::savePropertyWidget()
+{
+	ComponentView::savePropertyWidget();
+
+	if (m->variablePropertiesWidget)
+		m->variablePropertiesWidgetOpen = m->variablePropertiesWidget->open();
+	m->variablePropertiesWidget = nullptr;
+}
+
+void VariableView::setInitialValue(QString newValue)
+{
+	m->model->setInitialValue(newValue);
+}
+void VariableView::updateInitialValue()
+{
+	setInitialValue(dynamic_cast<QLineEdit *>(sender())->text());
 }
 
 void VariableView::paint(QPainter *painter, const QStyleOptionGraphicsItem *options, QWidget *widget)

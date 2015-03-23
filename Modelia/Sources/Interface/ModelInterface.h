@@ -28,7 +28,7 @@ public:
 
 	void saveModel(QString path)
 	{
-		boost::property_tree::info_parser::write_info(path.toStdString(), model_->root().get());
+		boost::property_tree::info_parser::write_info(path.toStdString(), model_->root().export());
 	}
 
 	Model::Model * model() { return model_; }

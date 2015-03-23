@@ -3,8 +3,7 @@
 #include "Model.h"
 
 #include "Components/Variable.h"
-#include "Components/PureFunction.h"
-#include "Components/CodeFunction.h"
+#include "Components/Function.h"
 #include "Components/Composition.h"
 #include "Components/Link.h"
 

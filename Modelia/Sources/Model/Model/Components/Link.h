@@ -15,8 +15,8 @@ public:
 	
 	~Link();
 
-	PropertyTree get() const;
-	void set(PropertyTree & ptree);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	Composition * owner();
 	Slot * slot1();

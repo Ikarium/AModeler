@@ -2,15 +2,15 @@
 
 #include "Conf.h"
 
+#include <QScrollArea>
 #include <QGraphicsItem>
 #include <QStyleOptionGraphicsItem>
 #include <QIcon>
 #include <QPainter>
+#include <QToolBox>
 
 namespace Interface
 {
-
-void clearLayout(QLayout *layout);
 
 class ComponentView : public QObject, public QGraphicsItem
 {
@@ -20,22 +20,24 @@ public:
 
 	ComponentView(Model::Component *, PropertyTree &);
 	~ComponentView();
+
 	virtual void init();
 	virtual void updateSlots();
-	void setPropertiesWidget(QWidget*);
-	virtual void fillPropertiesWidget();
 
 /**************************
 PropertyTrees
 ***************************/
-	PropertyTree get() const;
-
-	void set(PropertyTree &);
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
 	Model::Component * model();
 	QSizeF const & size() const;
 	void setSize(QSizeF const &);
+
+	void setPropertiesWidget(QWidget*);
 	QWidget* propertiesWidget() const;
+	virtual void fillPropertiesWidget();
+	virtual void savePropertyWidget();
 
 	QIcon getIcon();
 
@@ -53,15 +55,13 @@ protected:
 	virtual void drawIllustration(QPainter *, const QStyleOptionGraphicsItem *) const;
 	virtual void drawName(QPainter *, const QStyleOptionGraphicsItem *) const;
 
-	struct PropertyWidgetElements
-	{
-		QLineEdit* name;
-	};
-	PropertyWidgetElements propertyWidgetElements;
-
 protected slots:
 	void nameValidator();
 	void deleteComponent();
+
+signals:
+	void updatePropertiesWidget();
+	void removePropertiesWidget();
 
 private:
 	class Impl;

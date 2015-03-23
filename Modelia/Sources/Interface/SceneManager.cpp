@@ -9,10 +9,10 @@
 #include <QLabel>
 #include <QAction>
 #include <QSpinBox>
+#include <QSpacerItem>
 
 #include "Model/Model/Components/Variable.h"
-#include "Model/Model/Components/PureFunction.h"
-#include "Model/Model/Components/CodeFunction.h"
+#include "Model/Model/Components/Function.h"
 #include "Model/Model/Components/Process.h"
 #include "Model/Model/Components/Composition.h"
 #include "Model/Model/Components/Component.h"
@@ -115,7 +115,9 @@ void SceneManager::setCurrentComposition(Model::Composition * composition)
 		m->navActionsMap[newAction] = elem;
 		i++;
 	}
-	
+
+	m->currentPropertiesWidgetComponent = nullptr;
+
 	if (m->propertiesWidget)
 		focusItemChanged(nullptr, nullptr, Qt::FocusReason::OtherFocusReason);
 
@@ -129,14 +131,8 @@ void SceneManager::clean()
 
 	if (m->currentComposition)
 	{
-		for (auto & component : m->currentComposition->variables())
-			removeItem(component.view());
-		for (auto & component : m->currentComposition->pureFunctions())
-			removeItem(component.view());
-		for (auto & component : m->currentComposition->codeFunctions())
-			removeItem(component.view());
-		for (auto & component : m->currentComposition->compositions())
-			removeItem(component.view());
+		for (auto component : m->currentComposition->components())
+			removeItem(component->view());
 		for (auto & link : m->currentComposition->links())
 			removeItem(link.view());
 
@@ -155,17 +151,10 @@ void SceneManager::populate()
 {
 	if (m->currentComposition)
 	{
-		for (auto & component : m->currentComposition->variables())
-			addItem(component.view());
-		for (auto & component : m->currentComposition->pureFunctions())
-			addItem(component.view());
-		for (auto & component : m->currentComposition->codeFunctions())
-			addItem(component.view());
+		for (auto & component : m->currentComposition->components())
+			addItem(component->view());
 		for (auto & component : m->currentComposition->compositions())
-		{
-			addItem(component.view());
 			component.view()->updateSlots();
-		}
 		for (auto & link : m->currentComposition->links())
 			addItem(link.view());
 
@@ -258,58 +247,6 @@ void SceneManager::addElem(QMimeData const * mimeData, QPointF const & pos)
 	addItem(newComponent->view());
 }
 
-void SceneManager::addLink(SlotView * src, ComponentView * dest)
-{
-
-	bool go = false;
-	Model::Slot * input = nullptr;
-	if (dynamic_cast<VariableView*>(dest) 
-		&& !dynamic_cast<VariableView*>(src->model()->owner()->view())
-		&& src->model()->owner() != dest->model())
-	{
-		input = &dest->model()->inputs().front();
-		go = true;
-	}
-	else if (dynamic_cast<ProcessView*>(dest)
-		&& src->model()->owner() != dest->model())
-	{
-		input = dynamic_cast<ProcessView*>(dest)->addNewInput();
-		go = true;
-	}
-
-	if (go)
-		addLink(src, input->view());
-}
-
-void SceneManager::addLink(SlotView * src, SlotView * dest)
-{
-	PropertyTree ptree;
-	ptree.put_value("Link");
-	if (src->model()->owner() == m->currentComposition)
-	{
-		ptree.put("Slot1.ComponentName", "__Parent");
-		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
-	}
-	else
-	{
-		ptree.put("Slot1.ComponentName", src->model()->owner()->name().toStdString());
-		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
-	}
-	if (dest->model()->owner() == m->currentComposition)
-	{
-		ptree.put("Slot2.ComponentName", "__Parent");
-		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
-	}
-	else
-	{
-		ptree.put("Slot2.ComponentName", dest->model()->owner()->name().toStdString());
-		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
-	}
-	Model::Link * link = m->currentComposition->addLink(ptree);
-	addItem(link->view());
-}
-
-
 void SceneManager::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 
@@ -366,9 +303,18 @@ void SceneManager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 				&& slot->model()->owner() == m->currentComposition) break;
 			else if (component) break;
 		}
-		if (component)
-			addLink(m->tempLinkSlot, component);
-		else if (slot)
+
+		/*Detecting connection type*/
+
+		/*If it is slot with component, check if we dont 
+		link the parent output with some component*/
+		if (component && 
+			!(m->tempLinkSlot->model()->owner() == m->currentComposition &&
+				m->tempLinkSlot->model()->slotType() == Model::SlotType::output)) 
+				addLink(m->tempLinkSlot, component);
+		/*Slot with slot, check we dont try to link output with parent input
+		or input with parent output*/
+		else if (slot && m->tempLinkSlot->model()->slotType() == slot->model()->slotType())
 			addLink(m->tempLinkSlot, slot);
 			
 		removeItem(m->tempLink);
@@ -379,6 +325,58 @@ void SceneManager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 	}
 	else 
 		QGraphicsScene::mouseReleaseEvent(event);
+}
+
+
+void SceneManager::addLink(SlotView * src, ComponentView * dest)
+{
+
+	bool go = false;
+	Model::Slot * input = nullptr;
+	if (dynamic_cast<VariableView*>(dest)
+		&& !dynamic_cast<VariableView*>(src->model()->owner()->view())
+		&& src->model()->owner() != dest->model())
+	{
+		input = &dest->model()->inputs().front();
+		go = true;
+	}
+	else if (dynamic_cast<ProcessView*>(dest)
+		&& src->model()->owner() != dest->model())
+	{
+		input = dynamic_cast<ProcessView*>(dest)->addNewInput();
+		go = true;
+	}
+
+	if (go)
+		addLink(src, input->view());
+}
+
+void SceneManager::addLink(SlotView * src, SlotView * dest)
+{
+	PropertyTree ptree;
+	ptree.put_value("Link");
+	if (src->model()->owner() == m->currentComposition)
+	{
+		ptree.put("Slot1.ComponentName", "__Parent");
+		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
+	}
+	else
+	{
+		ptree.put("Slot1.ComponentName", src->model()->owner()->name().toStdString());
+		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
+	}
+	if (dest->model()->owner() == m->currentComposition)
+	{
+		ptree.put("Slot2.ComponentName", "__Parent");
+		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
+	}
+	else
+	{
+		ptree.put("Slot2.ComponentName", dest->model()->owner()->name().toStdString());
+		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
+	}
+	Model::Link * link = m->currentComposition->addLink(ptree);
+	addItem(link->view());
 }
 
 
@@ -412,18 +410,44 @@ void SceneManager::focusItemChanged(QGraphicsItem * newFocusItem,
 
 void SceneManager::Impl::setPropertyWidget(ComponentView * newComponent)
 {
-	currentPropertiesWidgetComponent = newComponent;
-	propertiesWidget->setDisabled(false);
-	currentPropertiesWidgetComponent->setPropertiesWidget(propertiesWidget);
-	currentPropertiesWidgetComponent->fillPropertiesWidget();
+	if (newComponent)
+	{
+		currentPropertiesWidgetComponent = newComponent;
+		propertiesWidget->setDisabled(false);
+		currentPropertiesWidgetComponent->setPropertiesWidget(propertiesWidget);
+		connect(newComponent, SIGNAL(updatePropertiesWidget()),
+			owner, SLOT(updatePropertiesWidget()),
+			Qt::UniqueConnection);
+		connect(newComponent, SIGNAL(removePropertiesWidget()),
+			owner, SLOT(removePropertiesWidget()),
+			Qt::UniqueConnection);
+		currentPropertiesWidgetComponent->fillPropertiesWidget();
+		propertiesWidget->layout()->addItem(new QSpacerItem(0, 9999,
+			QSizePolicy::Ignored, QSizePolicy::Maximum));
+	}
+}
+
+void SceneManager::updatePropertiesWidget()
+{
+	ComponentView* tmp = m->currentPropertiesWidgetComponent;
+	m->unsetPropertyWidget();
+	m->setPropertyWidget(tmp);
+}
+
+void SceneManager::removePropertiesWidget()
+{
+	m->currentPropertiesWidgetComponent = nullptr;
+	m->unsetPropertyWidget();
 }
 
 void SceneManager::Impl::unsetPropertyWidget()
 {
+	if (currentPropertiesWidgetComponent)
+		currentPropertiesWidgetComponent->savePropertyWidget();
 	propertiesWidget->setDisabled(true);
 	if (propertiesWidget->layout())
-		clearLayout(propertiesWidget->layout());
-	delete propertiesWidget->layout();
+		clearQLayout(propertiesWidget->layout());
+
 	currentPropertiesWidgetComponent = nullptr;
 }
 

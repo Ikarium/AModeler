@@ -29,22 +29,22 @@ PureFunction::Impl::Impl(PureFunction* owner, PropertyTree & ptree)
 PureFunction::PureFunction(Composition * owner, PropertyTree & ptree)
 	: m(new Impl(this, ptree)), Process(owner, ptree)
 {
-	set(ptree);
+	import(ptree);
 	m->view.init();
 }
 
-PropertyTree PureFunction::get() const
+PropertyTree PureFunction::export() const
 {
-	PropertyTree ptree = Process::get();
+	PropertyTree ptree = Process::export();
 
 	ptree.put_value("PureFunction");
 	ptree.put("Code", m->code.toStdString());
-	ptree.put_child("View", m->view.get());
+	ptree.put_child("View", m->view.export());
 
 	return ptree;
 }
 
-void PureFunction::set(PropertyTree & ptree)
+void PureFunction::import(PropertyTree & ptree)
 {
 	checkHierarchy("PureFunction", QString::fromStdString(ptree.get_value<std::string>()));
 

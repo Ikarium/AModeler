@@ -2,9 +2,11 @@
 
 #include "Conf.h"
 
+#include <QScrollArea>
 #include <QGraphicsScene>
 #include<QMimeData>
 #include <QToolBar>
+#include <QToolBox>
 
 namespace Interface
 {
@@ -44,7 +46,9 @@ protected:
 
 protected slots:
 	void focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason);
-	void navBarElemTriggered(); 
+	void navBarElemTriggered();
+	void updatePropertiesWidget();
+	void removePropertiesWidget();
 	 
 private:
 	class Impl;

@@ -20,7 +20,9 @@
 #include <Karma>
 using namespace Karma;
 
+
 #include "Declarator.h"
+#include "App.h"
 
 /***************************************************************************
 ModeliaExection
@@ -35,11 +37,3 @@ struct ModeliaExection : public KExeption
 		: KExeption("\nIn: " + file + "\t" + QString::number(line)
 		+ "\n   Modelia exception: " + message + "\n", code){}
 };
-
-
-inline PropertyTree simpleType() 
-{ 
-	PropertyTree simpleType;
-	infoToPree("SimpleType.ATypes", simpleType);
-	return simpleType;
-}

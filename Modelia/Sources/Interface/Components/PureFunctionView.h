@@ -10,17 +10,16 @@ class PureFunctionView : public ProcessView
 
 public:
 
-	PureFunctionView(Model::PureFunction *, PropertyTree &);
-	~PureFunctionView();
+	FunctionView(Model::PureFunction *, PropertyTree &);
+	~FunctionView();
 
 	/**************************
 	PropertyTrees
 	***************************/
-	PropertyTree get() const;
+	PropertyTree export() const;
+	void import(PropertyTree & ptree);
 
-	void set(PropertyTree &);
-
-	Model::PureFunction * model();
+	Model::Function * model();
 
 private:
 	class Impl;

@@ -1,0 +1,85 @@
+FileType Library
+Root LibraryItem
+{
+	Name root
+	isElement false
+
+	Items
+	{
+		Item LibraryItem
+		{
+			Name Variable
+			isElement true
+			
+			Element Variable
+			{
+				Name Variable
+				
+				Type Type
+				{
+					Vectorized 0
+					Class Class
+					{
+						Name T
+						Properties
+						{
+							Property
+							{
+								Name x
+								BaseType 1
+							}
+							Property
+							{
+								Name y
+								BaseType 1
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		Item LibraryItem
+		{
+			Name Process
+			isElement false
+			
+			Items
+			{
+				Item LibraryItem
+				{
+					Name Purefunction
+					isElement true
+					
+					Element PureFunction
+					{
+						Name Purefunction
+						
+					}
+				}
+				Item LibraryItem
+				{
+					Name Codefunction
+					isElement true
+					
+					Element CodeFunction
+					{
+						Name Codefunction
+						
+					}
+				}
+				Item LibraryItem
+				{
+					Name Composition
+					isElement true
+					
+					Element Composition
+					{
+						Name Composition
+						
+					}
+				}
+			}
+		}
+	}
+}

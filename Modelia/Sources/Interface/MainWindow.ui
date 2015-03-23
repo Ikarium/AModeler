@@ -6,63 +6,170 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1071</width>
-    <height>881</height>
+    <width>1050</width>
+    <height>847</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" rowspan="3">
-     <widget class="Interface::LibraryView" name="LibraryView">
-      <property name="maximumSize">
-       <size>
-        <width>200</width>
-        <height>16777215</height>
-       </size>
+    <item row="0" column="1" rowspan="2">
+     <widget class="Interface::SceneView" name="SceneView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>5</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="Interface::SceneView" name="SceneView"/>
-    </item>
-    <item row="2" column="1">
-     <widget class="QScrollArea" name="scrollArea">
+    <item row="0" column="2">
+     <widget class="QScrollArea" name="PropertiesScrollArea">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
+        <horstretch>2</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="maximumSize">
        <size>
-        <width>16777215</width>
-        <height>200</height>
+        <width>300</width>
+        <height>16777215</height>
        </size>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="Properties">
+      <widget class="QWidget" name="PropertiesWidget">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>16</width>
-         <height>16</height>
+         <width>225</width>
+         <height>768</height>
         </rect>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>2</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <property name="elideMode">
+       <enum>Qt::ElideNone</enum>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>false</bool>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="LibraryViewTab">
+       <attribute name="title">
+        <string>Libraries</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="Interface::ComponentsLibraryView" name="ComponentsLibraryView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="TypesManagerTab">
+       <attribute name="title">
+        <string>Types Manager</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="Interface::TypesLibraryView" name="TypesLibraryView"/>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="Interface::TypeEditor" name="TypeEditor">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>201</width>
+             <height>358</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -73,7 +180,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1071</width>
+     <width>1050</width>
      <height>21</height>
     </rect>
    </property>
@@ -159,9 +266,20 @@
    <header>SceneView.h</header>
   </customwidget>
   <customwidget>
-   <class>Interface::LibraryView</class>
+   <class>Interface::ComponentsLibraryView</class>
    <extends>QTreeView</extends>
-   <header>LibraryView/LibraryView.h</header>
+   <header>ComponentsLibraryView/ComponentsLibraryView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Interface::TypesLibraryView</class>
+   <extends>QTreeView</extends>
+   <header>TypesManagerView/TypesLibraryView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Interface::TypeEditor</class>
+   <extends>QWidget</extends>
+   <header>TypesManagerView/TypeEditor.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -11,7 +11,6 @@ class Process::Impl
 
 public:
 
-	Type type;
 	QString code;
 
 
@@ -34,7 +33,7 @@ Process::Impl::~Impl()
 Process::Process(Composition * owner, PropertyTree & ptree)
 	: m(new Impl(this, ptree)), Component(owner, ptree)
 {
-	set(ptree);
+	import(ptree);
 }
 
 Process::~Process() {}
@@ -42,21 +41,21 @@ Process::~Process() {}
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree Process::get() const
+PropertyTree Process::export() const
 {
-	PropertyTree ptree = Component::get();
+	PropertyTree ptree = Component::export();
 
 	ptree.put_value("Process");
 
 	for (Slot const & input : inputs())
-		ptree.add_child("Inputs.Slot", input.get());
+		ptree.add_child("Inputs.Slot", input.export());
 	for (Slot const & output : outputs())
-		ptree.add_child("Outputs.Slot", output.get());
+		ptree.add_child("Outputs.Slot", output.export());
 
 	return ptree;
 }
 
-void Process::set(PropertyTree & ptree)
+void Process::import(PropertyTree & ptree)
 {
 	checkHierarchy("Process", QString::fromStdString(ptree.get_value<std::string>()));
 
@@ -68,6 +67,9 @@ void Process::set(PropertyTree & ptree)
 			addOutput(output.second);
 }
 
+/**************************
+Slot accessors
+***************************/
 Slot * Process::addInput(PropertyTree & ptree)
 {
 	ptree.put("UniqueLink", true);

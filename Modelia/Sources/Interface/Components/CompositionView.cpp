@@ -2,6 +2,10 @@
 
 #include "CompositionView.h"
 
+#include "ui_CompositionProperties.h"
+
+#include "KExpandableWidget.h"
+
 #include "Model/Model/Components/Composition.h"
 
 #include <QFormLayout>
@@ -26,6 +30,9 @@ public:
 
 	Model::Composition * model;
 
+	KExpandableWidget* compositionPropertiesWidget = nullptr;
+	bool compositionPropertiesWidgetOpen = true;
+
 	Impl(CompositionView *, Model::Composition *);
 	~Impl();
 
@@ -46,7 +53,7 @@ CompositionView::Impl::~Impl()
 CompositionView::CompositionView(Model::Composition * model, PropertyTree & ptree)
 	: m(new Impl(this, model)), ProcessView(static_cast<Model::Process*>(model), ptree)
 {
-	set(ptree);
+	import(ptree);
 }
 
 CompositionView::~CompositionView()
@@ -57,14 +64,14 @@ CompositionView::~CompositionView()
 /**************************
 PropertyTrees
 ***************************/
-PropertyTree CompositionView::get() const
+PropertyTree CompositionView::export() const
 {
-	PropertyTree ptree = ProcessView::get();
+	PropertyTree ptree = ProcessView::export();
 
 	return ptree;
 }
 
-void CompositionView::set(PropertyTree & ptree)
+void CompositionView::import(PropertyTree & ptree)
 {
 	if (ptree.get_value<std::string>() == "View")
 	{
@@ -82,11 +89,25 @@ void CompositionView::fillPropertiesWidget()
 {
 	ProcessView::fillPropertiesWidget();
 
-	QPushButton * addToLibrary = new QPushButton("Add to Library");
-	addToLibrary->setObjectName(savePtree(model()->get()));
-	connect(addToLibrary, SIGNAL(clicked()), scene()->views().first()->window(), SLOT(addToLibrary()));
-	dynamic_cast<QGridLayout*>(propertiesWidget()->layout())->addWidget(addToLibrary, 1, 0, 2, 1);
+	Ui::CompositionProperties ui;
+	m->compositionPropertiesWidget = new KExpandableWidget("Composition", m->compositionPropertiesWidgetOpen);
+	ui.setupUi(m->compositionPropertiesWidget->content());
+
+	ui.addToLibrary->setObjectName(savePtree(model()->export()));
+	connect(ui.addToLibrary, SIGNAL(clicked()), scene()->views().first()->window(), SLOT(addToLibrary()));
+
+	propertiesWidget()->layout()->addWidget(m->compositionPropertiesWidget);
 }
+
+void CompositionView::savePropertyWidget()
+{
+	ProcessView::savePropertyWidget();
+
+	if (m->compositionPropertiesWidget)
+		m->compositionPropertiesWidgetOpen = m->compositionPropertiesWidget->open();
+	m->compositionPropertiesWidget = nullptr;
+}
+
 
 void CompositionView::iterationCountUpdate(int iterationCount)
 {
