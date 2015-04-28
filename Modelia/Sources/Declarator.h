@@ -31,7 +31,7 @@ namespace Interface
 	class SceneManager;
 	class SceneView;
 
-	class LibraryModel;
+	class ComponentsLibraryView;
 
 	class TypesLibraryView;
 	class TypeEditor;

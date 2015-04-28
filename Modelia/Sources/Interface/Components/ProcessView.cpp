@@ -122,21 +122,28 @@ void ProcessView::fillPropertiesWidget()
 	deletePixmap.setMask(tmp.createMaskFromColor(Qt::transparent));
 	deletePixmap = deletePixmap.scaledToHeight(13, Qt::SmoothTransformation);
 
+
 	QGridLayout* layout = new QGridLayout();
 	int i = 0;
 	for (Model::Slot & input : m->model->inputs())
 	{
-		QLineEdit * inputLineEdit = new QLineEdit(input.name());
-		inputLineEdit->setObjectName(input.name());
-		inputLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-		connect(inputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
-		layout->addWidget(inputLineEdit, i, 0, 1, 3, Qt::AlignTop);
+		QLineEdit * inputNameLineEdit = new QLineEdit(input.name());
+		inputNameLineEdit->setObjectName(input.name());
+		inputNameLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+		connect(inputNameLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
+		layout->addWidget(inputNameLineEdit, i, 0, 1, 2, Qt::AlignTop);
+
+		QLineEdit * inputTypeLineEdit = new QLineEdit(input.type()->getPath() + (input.vectorized() ? "[]" : ""));
+		inputTypeLineEdit->setObjectName(input.name());
+		inputTypeLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+		connect(inputTypeLineEdit, SIGNAL(editingFinished()), this, SLOT(slotReType()));
+		layout->addWidget(inputTypeLineEdit, i, 2, 1, 2, Qt::AlignTop);
 
 		QPushButton * deleteInputBtn = new QPushButton(QIcon(deletePixmap), "");
 		deleteInputBtn->setObjectName(input.name());
 		deleteInputBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(deleteInputBtn, SIGNAL(clicked()), this, SLOT(deleteSlot()));
-		layout->addWidget(deleteInputBtn, i, 3, 1, 1, Qt::AlignTop);
+		layout->addWidget(deleteInputBtn, i, 4, 1, 1, Qt::AlignTop);
 		i++;
 	}
 	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Preferred, QSizePolicy::Expanding), i, 0);
@@ -150,13 +157,19 @@ void ProcessView::fillPropertiesWidget()
 		outputLineEdit->setObjectName(output.name());
 		outputLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(outputLineEdit, SIGNAL(editingFinished()), this, SLOT(slotRename()));
-		layout->addWidget(outputLineEdit, i, 0, 1, 3, Qt::AlignTop);
+		layout->addWidget(outputLineEdit, i, 0, 1, 2, Qt::AlignTop);
+
+		QLineEdit * outputTypeLineEdit = new QLineEdit(output.type()->getPath() + (output.vectorized() ? "[]" : ""));
+		outputTypeLineEdit->setObjectName(output.name());
+		outputTypeLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+		connect(outputTypeLineEdit, SIGNAL(editingFinished()), this, SLOT(slotReType()));
+		layout->addWidget(outputTypeLineEdit, i, 2, 1, 2, Qt::AlignTop);
 
 		QPushButton * deleteOutputBtn = new QPushButton(QIcon(deletePixmap), "");
 		deleteOutputBtn->setObjectName(output.name());
 		deleteOutputBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		connect(deleteOutputBtn, SIGNAL(clicked()), this, SLOT(deleteSlot()));		
-		layout->addWidget(deleteOutputBtn, i, 3, 1, 1, Qt::AlignTop);
+		layout->addWidget(deleteOutputBtn, i, 4, 1, 1, Qt::AlignTop);
 
 		i++;
 	}
@@ -185,13 +198,51 @@ void ProcessView::savePropertyWidget()
 void ProcessView::slotRename()
 {
 	Model::Slot * slot = m->model->findSlot(sender()->objectName());
+	if (!slot)
+		KThrow(ModeliaExection, lvl5, "Slot not found.");
+
+	QLineEdit * outputLineEdit = dynamic_cast<QLineEdit *>(sender());
+	if (slot->slotType() == Model::SlotType::output)
+	{
+		if (!m->model->findOutputSlot(outputLineEdit->text()))
+			slot->setName(outputLineEdit->text());
+	}
+	else
+		if (!m->model->findSlot(outputLineEdit->text()))
+			slot->setName(outputLineEdit->text());
+
+	outputLineEdit->setText(slot->name());
+
+	updateSlots();
+
+	QList<QWidget *> widgets = m->processPropertiesWidget->layout()
+		->parentWidget()->findChildren<QWidget *>(sender()->objectName());
+	for (QWidget * widget : widgets)
+		widget->setObjectName(slot->name());
+
+	QGraphicsItem::update();
+}
+
+void ProcessView::slotReType()
+{
+	Model::Slot * slot = m->model->findSlot(sender()->objectName());
 	if (slot)
 	{
-		QLineEdit * outputLineEdit = dynamic_cast<QLineEdit *>(sender());
-		if (m->model->findSlot(outputLineEdit->text()))
-			outputLineEdit->setText(slot->name());
-		else
-			slot->setName(outputLineEdit->text());
+		QLineEdit * typeLineEdit = dynamic_cast<QLineEdit *>(sender());
+		QString path = typeLineEdit->text();
+
+		bool vectorized = path.endsWith("[]");
+		if (vectorized)
+			path.chop(2);
+
+		Model::Type* newAliasType = App::typesLibrary->usePath(path);
+		if (newAliasType)
+		{
+			slot->setType(newAliasType);
+			slot->setVectorized(vectorized);
+		}
+
+		typeLineEdit->setText(slot->type()->getPath() + (slot->vectorized() ? "[]" : ""));
 	}
 
 	updateSlots();
@@ -210,7 +261,7 @@ void ProcessView::deleteSlot()
 	QGraphicsItem::update();
 }
 
-Model::Slot * ProcessView::addNewOutput()
+Model::Slot * ProcessView::addNewOutput(Model::Type* type, bool vectorized)
 {
 	PropertyTree ptree;
 	ptree.put_value("Slot");
@@ -222,7 +273,13 @@ Model::Slot * ProcessView::addNewOutput()
 	ptree.put("Name", name.toStdString());
 	ptree.put("UniqueLink", false);
 	ptree.put("SlotType", "Output");
-	ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
+
+	if (type)
+		ptree.put("Type", type->getPath().toStdString());
+	else
+		ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
+
+	ptree.put("Vectorized", vectorized);
 
 	Model::Slot * slot = m->model->addOutput(ptree);
 	slot->view()->setParentItem(this);
@@ -235,19 +292,25 @@ Model::Slot * ProcessView::addNewOutput()
 	return slot;
 }
 
-Model::Slot * ProcessView::addNewInput()
+Model::Slot * ProcessView::addNewInput(Model::Type* type, bool vectorized, QString originalName)
 {
 	PropertyTree ptree;
 	ptree.put_value("Slot");
 
-	QString name = "x";
+	QString name = originalName;
 	for (int i = 2; m->model->findSlot(name); i++)
-		name = "x" + QString::number(i);
+		name = originalName + QString::number(i);
 
 	ptree.put("Name", name.toStdString());
 	ptree.put("UniqueLink", true);
 	ptree.put("SlotType", "Input");
-	ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
+
+	if (type)
+		ptree.put("Type", type->getPath().toStdString());
+	else
+		ptree.put("Type", App::typesLibrary->defaultType()->getPath().toStdString());
+
+	ptree.put("Vectorized", vectorized);
 
 	Model::Slot * slot = m->model->addInput(ptree);
 	slot->view()->setParentItem(this);

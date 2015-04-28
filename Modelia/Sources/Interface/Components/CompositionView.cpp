@@ -7,6 +7,7 @@
 #include "KExpandableWidget.h"
 
 #include "Model/Model/Components/Composition.h"
+#include "Model/ComponentsLibrary/ComponentsLibrary.h"
 
 #include <QFormLayout>
 #include <QVBoxLayout>
@@ -93,8 +94,8 @@ void CompositionView::fillPropertiesWidget()
 	m->compositionPropertiesWidget = new KExpandableWidget("Composition", m->compositionPropertiesWidgetOpen);
 	ui.setupUi(m->compositionPropertiesWidget->content());
 
-	ui.addToLibrary->setObjectName(savePtree(model()->export()));
-	connect(ui.addToLibrary, SIGNAL(clicked()), scene()->views().first()->window(), SLOT(addToLibrary()));
+	ui.addToLibrary->setProperty("compositionModel", qVariantFromValue((void*) model()));
+	connect(ui.addToLibrary, SIGNAL(clicked()), App::componentsLibrary, SLOT(addModelElement()));
 
 	propertiesWidget()->layout()->addWidget(m->compositionPropertiesWidget);
 }

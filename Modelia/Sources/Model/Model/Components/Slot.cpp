@@ -26,6 +26,7 @@ public:
 	QString name;
 	List<Link*> links;
 	Link* uniqueLink = nullptr;
+	bool vectorized = false;
 
 	Impl(Slot*, Component*, PropertyTree &);
 	~Impl();
@@ -79,6 +80,7 @@ PropertyTree Slot::export() const
 	ptree.put("SlotType", (m->slotType == SlotType::input) ? "Input" : "Output");
 
 	ptree.put("Type", m->type->getPath().toStdString());
+	ptree.put("Vectorized", m->vectorized);
 
 	ptree.put_child("View", m->view->export());
 
@@ -97,7 +99,7 @@ void Slot::import(PropertyTree & ptree)
 					? SlotType::input 
 					: SlotType::output;
 	m->type = App::typesLibrary->usePath(QString::fromStdString(ptree.get<std::string>("Type")));
-
+	m->vectorized = ptree.get<bool>("Vectorized");
 }
 
 /**************************
@@ -105,7 +107,8 @@ Getter
 ***************************/
 
 QString const & Slot::name() const { return m->name; }
-Type const & Slot::type() const { return *m->type; }
+Type * Slot::type() const { return m->type; }
+bool Slot::vectorized() const { return m->vectorized; }
 int const Slot::pos() const { return m->pos; }
 Component const * Slot::owner() const { return m->owner; }
 Component* Slot::owner() { return m->owner; }
@@ -139,6 +142,8 @@ Slot* Slot::linkedUniqueSlot()
 Setter
 ***************************/
 
+void Slot::setVectorized(bool vectorized) { m->vectorized = vectorized; }
+void Slot::setType(Type * newType) { m->type = newType; }
 void Slot::setPos(int pos) { m->pos = pos; }
 void Slot::setName(QString & name) { m->name = name; }
 void Slot::setViewDeleted() { m->view = nullptr; }

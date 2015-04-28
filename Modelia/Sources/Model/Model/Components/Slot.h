@@ -29,7 +29,8 @@ public:
 	***************************/
 
 	QString const & name() const;
-	Type const & type() const;
+	Type * type() const;
+	bool vectorized() const;
 	int const pos() const;
 	Component const * owner() const;
 	Component* owner();
@@ -44,6 +45,8 @@ public:
 	/**************************
 	Setter
 	***************************/
+	void setVectorized(bool);
+	void setType(Type *);
 	void setPos(int pos);
 	void setName(QString &);
 	void setViewDeleted();

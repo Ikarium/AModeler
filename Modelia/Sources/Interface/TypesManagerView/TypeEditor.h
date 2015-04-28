@@ -5,6 +5,7 @@
 
 namespace Interface
 {
+
 class TypeEditor : public QWidget
 {
 	Q_OBJECT
@@ -32,4 +33,5 @@ private:
 	class Impl;
 	UniquePtr<Impl> m;
 };
+
 }

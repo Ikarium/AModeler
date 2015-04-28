@@ -28,8 +28,14 @@ Slot accessors
 	void removeInput();
 	void removeOutput();
 
-	QString initialValue();
+	Type * type() const;
+	void setType(Type*);
+	bool vectorized() const;
+	void setVectorized(bool);
+	QString initialValue() const;
 	void setInitialValue(QString);
+
+	void updateSlots();
 
 	virtual Interface::VariableView * view() override;
 

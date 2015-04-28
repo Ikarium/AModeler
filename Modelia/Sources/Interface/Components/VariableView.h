@@ -34,6 +34,7 @@ private:
 	virtual void drawIllustration(QPainter *, const QStyleOptionGraphicsItem *) const override;
 
 public slots:
+	void reType();
 	void updateInitialValue();
 
 private:

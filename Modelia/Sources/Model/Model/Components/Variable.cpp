@@ -13,6 +13,7 @@ class Variable::Impl
 public:
 
 	Type* type;
+	bool vectorized;
 	Interface::VariableView view;
 	QString initialValue;
 
@@ -50,6 +51,8 @@ PropertyTree Variable::export() const
 
 	ptree.put_value("Variable");
 	ptree.put("Type", m->type->getPath().toStdString());
+	ptree.put("Vectorized", m->vectorized);
+	ptree.put("InitialValue", m->initialValue.toStdString());
 	ptree.put_child("View", m->view.export());
 
 	return ptree;
@@ -62,20 +65,24 @@ void Variable::import(PropertyTree & ptree)
 	if (ptree.count("Type") != 0)
 	{
 		m->type = App::typesLibrary->usePath(QString::fromStdString(ptree.get<std::string>("Type")));
+		m->vectorized = ptree.get<bool>("Vectorized");
 
 		PropertyTree slot;
 		slot.put_value("Slot");
 		slot.put("Type", m->type->getPath().toStdString());
+		slot.put("Vectorized", m->vectorized);
 		slot.put("UniqueLink", false);
 		slot.put("SlotType", "Input");
-		slot.put("Name", name().toStdString() + "_Input");
+		slot.put("Name", "Input");
 		Component::addInput(slot);
 		slot.put("SlotType", "Output");
-		slot.put("Name", name().toStdString() + "_Output");
+		slot.put("Name", "Output");
 		Component::addOutput(slot);
 	}
 	else KThrow(ModeliaExection, lvl7, "Variable ptree must have Type.");
 
+	if (ptree.count("InitialValue") != 0)
+		m->initialValue = QString::fromStdString(ptree.get<std::string>("InitialValue"));
 }
 
 /**************************
@@ -105,8 +112,21 @@ void Variable::removeOutput()
 {
 	KThrow(ModeliaExection, lvl5, "Variable outputs are fixed.");
 }
-QString Variable::initialValue() { return m->initialValue; }
+Type * Variable::type() const { return m->type; }
+void Variable::setType(Type* type) { m->type = type; }
+bool Variable::vectorized() const { return m->vectorized; }
+void Variable::setVectorized(bool vectorized) { m->vectorized = vectorized; }
+QString Variable::initialValue() const { return m->initialValue; }
 void Variable::setInitialValue(QString newValue) { m->initialValue = newValue; }
+
+void Variable::updateSlots()
+{
+	inputs().front().setType(m->type);
+	inputs().front().setVectorized(m->vectorized);
+	outputs().front().setType(m->type);
+	outputs().front().setVectorized(m->vectorized);
+}
+
 Interface::VariableView * Variable::view()
 {
 	return &m->view;

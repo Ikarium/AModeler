@@ -16,6 +16,8 @@ ComponentsLibraryView::ComponentsLibraryView(QWidget * parent) : QTreeView(paren
 	setAcceptDrops(false);
 	setDropIndicatorShown(true);
 	setDragDropMode(QAbstractItemView::DragDrop);
+
+	App::componentsLibraryView = this;
 }
 
 
@@ -24,6 +26,16 @@ ComponentsLibraryView::~ComponentsLibraryView()
 
 }
 
+void ComponentsLibraryView::init(Model::ComponentsLibraryItem* item)
+{
+	if (!item) item = App::componentsLibrary->root();
+	if (item->childrenCount() != 0)
+	{
+		setExpanded(App::componentsLibrary->index(item), item->expanded());
+		for (Model::ComponentsLibraryItem* child : item->children())
+			init(child);
+	}
+}
 
 void ComponentsLibraryView::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -62,12 +74,28 @@ void ComponentsLibraryView::startDrag(Qt::DropActions supportedActions)
 								model()->data(selectedIndexes().first(), 
 								Qt::UserRole));
 
-
 	QDrag *drag = new QDrag(this);
 	drag->setMimeData(mimeData);
 	drag->setHotSpot(QPoint(pixmap.width() / 2, pixmap.height() / 2));
 	drag->setPixmap(pixmap);
 	drag->exec(Qt::CopyAction);
+}
+
+void ComponentsLibraryView::setModel(QAbstractItemModel * model)
+{
+	QTreeView::setModel(model);
+
+	init();
+}
+
+void ComponentsLibraryView::onExpanded(const QModelIndex & index)
+{
+	App::componentsLibrary->item(index)->setExpanded(true);
+}
+
+void ComponentsLibraryView::onCollapsed(const QModelIndex & index)
+{
+	App::componentsLibrary->item(index)->setExpanded(false);
 }
 
 }

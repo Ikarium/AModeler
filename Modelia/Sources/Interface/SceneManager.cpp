@@ -58,10 +58,6 @@ SceneManager::SceneManager(Model::Composition * composition)
 	: m(new Impl(this, composition))
 {
 	update();
-
-	connect(this, SIGNAL(focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason))
-		  , this, SLOT(focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason)));
-
 	
 }
 
@@ -85,6 +81,8 @@ Model::Composition & SceneManager::currentComposition()
 void SceneManager::setCurrentComposition(Model::Composition * composition)
 {
 	clean();
+
+	removePropertiesWidget();
 
 	m->currentComposition = composition;
 	m->toolBar->clear();
@@ -119,8 +117,7 @@ void SceneManager::setCurrentComposition(Model::Composition * composition)
 	m->currentPropertiesWidgetComponent = nullptr;
 
 	if (m->propertiesWidget)
-		focusItemChanged(nullptr, nullptr, Qt::FocusReason::OtherFocusReason);
-
+		focusItemChanged(nullptr);
 
 	populate();
 
@@ -173,14 +170,6 @@ void SceneManager::populate()
 	}
 
 }
-
-void SceneManager::navBarElemTriggered()
-{
-	Model::Composition * composition = m->navActionsMap[qobject_cast<QAction*>(sender())];
-
-	setCurrentComposition(composition);
-}
-
 void SceneManager::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 {
 	if (event->mimeData()->hasFormat("application/modelia/library/component"))
@@ -243,23 +232,31 @@ void SceneManager::addElem(QMimeData const * mimeData, QPointF const & pos)
 	Model::Component * newComponent 
 		= reinterpret_cast<Model::Component*>(m->currentComposition->addElement(ptree));
 	newComponent->view()->setPos(QPoint(pos.x() - newComponent->view()->size().width() / 2,
-										pos.y() - newComponent->view()->size().height() / 2));
+		pos.y() - newComponent->view()->size().height() / 2));
+
+	focusItemChanged(newComponent->view());
+	newComponent->view()->setFocus();
 	addItem(newComponent->view());
+
 }
 
 void SceneManager::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 
 	QGraphicsItem * item = itemAt(event->scenePos(), views()[0]->transform());
-	SlotView * slot = dynamic_cast<SlotView*>(item);
-	if (slot && (slot->model()->slotType() == Model::SlotType::output
-		|| slot->model()->owner() == m->currentComposition))
+	ComponentView* tmpClickComponent = dynamic_cast<ComponentView*>(item);
+
+	focusItemChanged(tmpClickComponent);
+
+	m->tempLinkSlot = dynamic_cast<SlotView*>(item);
+	if (m->tempLinkSlot && (m->tempLinkSlot->model()->slotType() == Model::SlotType::output
+		|| m->tempLinkSlot->model()->owner() == m->currentComposition))
 	{
-		m->tempLinkSlot = slot;
 		m->linkDragMode = true;
 		views().first()->setDragMode(QGraphicsView::NoDrag);
 		m->tempLink = new LinkView(nullptr, PropertyTree());
-		m->tempLink->setLine(QLineF(slot->linkConnectionPos(), slot->linkConnectionPos()));
+		m->tempLink->setLine(QLineF(m->tempLinkSlot->linkConnectionPos(), 
+									m->tempLinkSlot->linkConnectionPos()));
 
 		addItem(m->tempLink);
 	}
@@ -289,6 +286,7 @@ void SceneManager::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void SceneManager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+
 	if (m->linkDragMode)
 	{
 		QList<QGraphicsItem *> allItems = items(event->scenePos());
@@ -331,49 +329,56 @@ void SceneManager::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void SceneManager::addLink(SlotView * src, ComponentView * dest)
 {
 
-	bool go = false;
-	Model::Slot * input = nullptr;
-	if (dynamic_cast<VariableView*>(dest)
-		&& !dynamic_cast<VariableView*>(src->model()->owner()->view())
+	VariableView* variableView = dynamic_cast<VariableView*>(dest);
+	ProcessView* processView = dynamic_cast<ProcessView*>(dest);
+
+	if (variableView
+		&& !dynamic_cast<Model::Variable*>(src->model()->owner())
+		&& src->model()->owner() != dest->model())
+		addLink(src, dest->model()->inputs().front().view());
+	else if (processView
 		&& src->model()->owner() != dest->model())
 	{
-		input = &dest->model()->inputs().front();
-		go = true;
-	}
-	else if (dynamic_cast<ProcessView*>(dest)
-		&& src->model()->owner() != dest->model())
-	{
-		input = dynamic_cast<ProcessView*>(dest)->addNewInput();
-		go = true;
+			Model::Slot * slot = processView->addNewInput(
+				src->model()->type(), 
+				src->model()->vectorized(), 
+				src->model()->owner()->name());
+		addLink(src, slot->view());
 	}
 
-	if (go)
-		addLink(src, input->view());
 }
 
 void SceneManager::addLink(SlotView * src, SlotView * dest)
 {
+	if (src->model()->type() != dest->model()->type()) return;
+	if (src->model()->owner() == dest->model()->owner()) return;
+
+
 	PropertyTree ptree;
 	ptree.put_value("Link");
 	if (src->model()->owner() == m->currentComposition)
 	{
 		ptree.put("Slot1.ComponentName", "__Parent");
 		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
+		ptree.put("Slot1.SlotType", (src->model()->slotType() == Model::SlotType::input) ? "Input" : "Output");
 	}
 	else
 	{
 		ptree.put("Slot1.ComponentName", src->model()->owner()->name().toStdString());
 		ptree.put("Slot1.SlotName", src->model()->name().toStdString());
+		ptree.put("Slot1.SlotType", (src->model()->slotType() == Model::SlotType::input) ? "Input" : "Output");
 	}
 	if (dest->model()->owner() == m->currentComposition)
 	{
 		ptree.put("Slot2.ComponentName", "__Parent");
 		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
+		ptree.put("Slot2.SlotType", (dest->model()->slotType() == Model::SlotType::input) ? "Input" : "Output");
 	}
 	else
 	{
 		ptree.put("Slot2.ComponentName", dest->model()->owner()->name().toStdString());
 		ptree.put("Slot2.SlotName", dest->model()->name().toStdString());
+		ptree.put("Slot2.SlotType", (dest->model()->slotType() == Model::SlotType::input) ? "Input" : "Output");
 	}
 	Model::Link * link = m->currentComposition->addLink(ptree);
 	addItem(link->view());
@@ -384,34 +389,42 @@ void SceneManager::focusItemChanged(QGraphicsItem * newFocusItem,
 									QGraphicsItem * oldFocusItem, 
 									Qt::FocusReason reason)
 {
+	if (reason != Qt::MouseFocusReason
+		&&	reason != Qt::TabFocusReason
+		&& reason != Qt::BacktabFocusReason
+		&& reason != Qt::ShortcutFocusReason
+		&& reason != Qt::MenuBarFocusReason
+		&& reason != Qt::OtherFocusReason)
+		return;
 
-	if (m->propertiesWidget && reason == Qt::MouseFocusReason)
-	{
-		ComponentView * newComponent = dynamic_cast<ComponentView*>(newFocusItem);
-		ComponentView * oldComponent = dynamic_cast<ComponentView*>(oldFocusItem);
+	ComponentView * newComponent = dynamic_cast<ComponentView*>(newFocusItem);
 
-		if (m->currentPropertiesWidgetComponent != newFocusItem 
-			&& newFocusItem && m->currentPropertiesWidgetComponent)
-		{
-			m->unsetPropertyWidget();
-		}
+	if (m->currentPropertiesWidgetComponent == newFocusItem)
+		return;
 
-		if (m->currentPropertiesWidgetComponent != newFocusItem 
-			&& !m->currentPropertiesWidgetComponent)
-		{
-			m->setPropertyWidget(newComponent);
-		}
-	}
-	else if (reason == Qt::FocusReason::OtherFocusReason)
-	{
+	if (!oldFocusItem) oldFocusItem = focusItem();
+	ComponentView * oldComponent = dynamic_cast<ComponentView*>(oldFocusItem);
+
+	if (m->currentPropertiesWidgetComponent)
 		m->unsetPropertyWidget();
-	}
+
+	if (newFocusItem)
+		m->setPropertyWidget(newComponent);
 }
+
+void SceneManager::navBarElemTriggered()
+{
+	Model::Composition * composition = m->navActionsMap[qobject_cast<QAction*>(sender())];
+
+	setCurrentComposition(composition);
+}
+
 
 void SceneManager::Impl::setPropertyWidget(ComponentView * newComponent)
 {
 	if (newComponent)
 	{
+		owner->removePropertiesWidget();
 		currentPropertiesWidgetComponent = newComponent;
 		propertiesWidget->setDisabled(false);
 		currentPropertiesWidgetComponent->setPropertiesWidget(propertiesWidget);

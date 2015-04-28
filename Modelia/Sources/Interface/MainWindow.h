@@ -26,7 +26,6 @@ public slots:
 	void loadLibrary();
 	void saveLibrary();
 	void compile();
-	void addToLibrary();
 
 private:
 	class Impl;

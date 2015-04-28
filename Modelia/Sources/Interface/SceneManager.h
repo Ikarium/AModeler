@@ -45,7 +45,9 @@ protected:
 
 
 protected slots:
-	void focusItemChanged(QGraphicsItem *, QGraphicsItem *, Qt::FocusReason);
+	void focusItemChanged(	QGraphicsItem *, 
+							QGraphicsItem * = nullptr, 
+							Qt::FocusReason = Qt::OtherFocusReason);
 	void navBarElemTriggered();
 	void updatePropertiesWidget();
 	void removePropertiesWidget();

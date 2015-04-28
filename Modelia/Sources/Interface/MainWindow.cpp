@@ -32,7 +32,6 @@ public:
 
 	Ui::MainWindow* ui;
 	SceneManager sceneManager;
-	Model::ComponentsLibrary componentsLibraryModel;
 
 	Impl(MainWindow* owner_);
 
@@ -44,23 +43,23 @@ public:
 MainWindow::Impl::Impl(MainWindow* owner_) :	owner(owner_), 
 												ui(new Ui::MainWindow)
 {
-	modelInterface.loadModel("Default.model");
-
-	ui->setupUi(owner);
 
 	new Model::TypesLibrary();
+	new Model::ComponentsLibrary();
+
+	ui->setupUi(owner);
+	ui->TypesLibraryView->setModel(App::typesLibrary);
+	ui->TypesLibraryView->setTypeEditor(ui->TypeEditor);
+
+	ui->ComponentsLibraryView->setModel(App::componentsLibrary);
+
+	modelInterface.loadModel("Default.model");
 
 	sceneManager.init(ui->ToolBar, ui->NavBar, ui->PropertiesWidget);
 	sceneManager.setCurrentComposition(&modelInterface.model()->root());
 
 	ui->SceneView->setScene(&sceneManager);
 	ui->SceneView->show();
-
-	ui->ComponentsLibraryView->setModel(&componentsLibraryModel);
-	ui->TypesLibraryView->setModel(App::typesLibrary);
-	ui->TypesLibraryView->setTypeEditor(ui->TypeEditor);
-
-
 
 }
 
@@ -92,9 +91,7 @@ void MainWindow::saveModel()
 		tr("Save model"), "", tr("AModeler models (*.model)"));
 
 	if (fileName != "")
-	{
 		m->modelInterface.saveModel(fileName);
-	}
 }
 
 void MainWindow::loadModel()
@@ -105,6 +102,7 @@ void MainWindow::loadModel()
 	if (fileName != "")
 	{
 		m->sceneManager.clean();
+		App::typesLibraryView->clearSelection();
 		m->modelInterface.loadModel(fileName);
 		m->sceneManager.setCurrentComposition(&m->modelInterface.model()->root());
 	}
@@ -116,9 +114,7 @@ void MainWindow::loadLibrary()
 		tr("Load library"), "", tr("AModeler library (*.library)"));
 
 	if (fileName != "")
-	{
-		m->componentsLibraryModel.populate(fileName);
-	}
+		App::componentsLibrary->populate(fileName);
 }
 
 void MainWindow::saveLibrary()
@@ -128,18 +124,13 @@ void MainWindow::saveLibrary()
 
 	if (fileName != "")
 	{
-		m->componentsLibraryModel.save(fileName);
+		App::componentsLibrary->save(fileName);
 	}
 }
 
 void MainWindow::compile()
 {
 	m->compiler.aModelToPhython(&m->modelInterface.model()->root());
-}
-
-void MainWindow::addToLibrary()
-{
-	m->componentsLibraryModel.addUserElem(sender()->objectName());
 }
 
 

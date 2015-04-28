@@ -35,7 +35,7 @@ Inserter
 ***************************/
 	Component* addElement(PropertyTree &);
 	Link* addLink(PropertyTree &);
-
+	
 /**************************
 Setter
 ***************************/

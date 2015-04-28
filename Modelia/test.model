@@ -1,310 +1,56 @@
-Name Root
-IterationCount 20
-Elements
+FileType Model
+TypesLibrary TypesLibraryItem
+ComponentLibrary ComponentLibraryItem
 {
-    Element Variable
+    Items
     {
-        Name Variable
-        Type Type
+        Item ComponentLibraryItem
         {
-            Vectorized false
-            Class Class
+            Name Composition
+            Element Component
             {
-                Name T
-                Properties
-                {
-                    Property
-                    {
-                        Name x
-                        BaseType 1
-                    }
-                    Property
-                    {
-                        Name y
-                        BaseType 1
-                    }
-                }
+                Name Composition
             }
-        }
-        View View
-        {
-            Pos
-            {
-                x -729
-                y -315.2608695652174
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
-        }
-    }
-    Element Function
-    {
-        Name Function
-        Outputs
-        {
-            Slot Slot
-            {
-                Name y
-                Pos 0
-                SlotType Output
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                View ""
-            }
-        }
-        Code "y = 3"
-        View View
-        {
-            Pos
-            {
-                x -1018.130434782609
-                y -335.0000000000001
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
-        }
-    }
-    Element Function
-    {
-        Name Function2
-        Inputs
-        {
-            Slot Slot
-            {
-                Name x
-                Pos 0
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                View ""
-            }
-            Slot Slot
-            {
-                Name x2
-                Pos 1
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                View ""
-            }
-        }
-        Outputs
-        {
-            Slot Slot
-            {
-                Name y
-                Pos 0
-                SlotType Output
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                View ""
-            }
-        }
-        Code "y = x * x\n"
-        View View
-        {
-            Pos
-            {
-                x -727.4782608695653
-                y -151.9565217391303
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
-        }
-    }
-    Element Function
-    {
-        Name Function3
-        Inputs
-        {
-            Slot Slot
-            {
-                Name x
-                Pos 0
-                SlotType Input
-                Type Type
-                {
-                    Vectorized false
-                    Class Class
-                    {
-                        Name T
-                        Properties
-                        {
-                            Property
-                            {
-                                Name simpleType
-                                BaseType 1
-                            }
-                        }
-                    }
-                }
-                View ""
-            }
-        }
-        Code print(x)
-        View View
-        {
-            Pos
-            {
-                x -701.3714508506613
-                y 17.36495746691865
-            }
-            Size
-            {
-                width 100
-                height 100
-            }
+            Expanded true
         }
     }
 }
-Links
+Model Composition
 {
-    Link Link
+    Name Root
+    IterationCount 1
+    Elements
     {
-        Slot1
+        Element Composition
         {
-            ComponentName Function2
-            SlotName y
+            Name Composition
+            IterationCount 1
+            View View
+            {
+                Pos
+                {
+                    x -429
+                    y -249
+                }
+                Size
+                {
+                    width 100
+                    height 100
+                }
+            }
         }
-        Slot2
-        {
-            ComponentName Variable
-            SlotName Variable_Input
-        }
-        View ""
     }
-    Link Link
+    View View
     {
-        Slot1
+        Pos
         {
-            ComponentName Variable
-            SlotName Variable_Output
+            x 0
+            y 0
         }
-        Slot2
+        Size
         {
-            ComponentName Function2
-            SlotName x
+            width 100
+            height 100
         }
-        View ""
-    }
-    Link Link
-    {
-        Slot1
-        {
-            ComponentName Function
-            SlotName y
-        }
-        Slot2
-        {
-            ComponentName Variable
-            SlotName Variable_Input
-        }
-        View ""
-    }
-    Link Link
-    {
-        Slot1
-        {
-            ComponentName Function
-            SlotName y
-        }
-        Slot2
-        {
-            ComponentName Function2
-            SlotName x2
-        }
-        View ""
-    }
-    Link Link
-    {
-        Slot1
-        {
-            ComponentName Function2
-            SlotName y
-        }
-        Slot2
-        {
-            ComponentName Function3
-            SlotName x
-        }
-        View ""
-    }
-}
-View View
-{
-    Pos
-    {
-        x 0
-        y 0
-    }
-    Size
-    {
-        width 100
-        height 100
     }
 }

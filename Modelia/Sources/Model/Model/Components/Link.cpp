@@ -63,21 +63,29 @@ PropertyTree Link::export() const
 	{
 		ptree.put("Slot1.ComponentName", "__Parent");
 		ptree.put("Slot1.SlotName", m->slot1->name().toStdString());
+		ptree.put("Slot1.SlotType", 
+			(m->slot1->slotType() == SlotType::input) ? "Input" : "Output");
 	}
 	else
 	{
 		ptree.put("Slot1.ComponentName", m->slot1->owner()->name().toStdString());
 		ptree.put("Slot1.SlotName", m->slot1->name().toStdString());
+		ptree.put("Slot1.SlotType",
+			(m->slot1->slotType() == SlotType::input) ? "Input" : "Output");
 	}
 	if (m->slot2->owner() == m->parrent)
 	{
 		ptree.put("Slot2.ComponentName", "__Parent");
 		ptree.put("Slot2.SlotName", m->slot2->name().toStdString());
+		ptree.put("Slot2.SlotType",
+			(m->slot2->slotType() == SlotType::input) ? "Input" : "Output");
 	}
 	else
 	{
 		ptree.put("Slot2.ComponentName", m->slot2->owner()->name().toStdString());
 		ptree.put("Slot2.SlotName", m->slot2->name().toStdString());
+		ptree.put("Slot2.SlotType",
+			(m->slot2->slotType() == SlotType::input) ? "Input" : "Output");
 	}
 
 	ptree.put_child("View", m->view.export());
@@ -90,25 +98,41 @@ void Link::import(PropertyTree & ptree)
 	checkHierarchy("Link", QString::fromStdString(ptree.get_value<std::string>()));
 
 	Slot * slot1;
-	Slot * slot2;
+	QString slot1Component = QString::fromStdString(ptree.get<std::string>("Slot1.ComponentName"));
+	QString slot1Name = QString::fromStdString(ptree.get<std::string>("Slot1.SlotName"));
+	SlotType slot1Type = QString::fromStdString(ptree.get<std::string>("Slot1.SlotType")) == "Input"
+		? SlotType::input
+		: SlotType::output;
 
-	if (QString::fromStdString(ptree.get<std::string>("Slot1.ComponentName")) == "__Parent")
-		slot1 = m->parrent->findSlot(
-		QString::fromStdString(ptree.get<std::string>("Slot1.SlotName")));
+	if (slot1Component == "__Parent")
+		if (slot1Type == SlotType::input)
+			slot1 = m->parrent->findInputSlot(slot1Name);
+		else
+			slot1 = m->parrent->findOutputSlot(slot1Name);
 	else
-		slot1 = m->parrent->find(
-					QString::fromStdString(ptree.get<std::string>("Slot1.ComponentName")))->
-					findSlot(
-					QString::fromStdString(ptree.get<std::string>("Slot1.SlotName")));
-	
-	if (QString::fromStdString(ptree.get<std::string>("Slot2.ComponentName")) == "__Parent")
-		slot2 = m->parrent->findSlot(
-		QString::fromStdString(ptree.get<std::string>("Slot2.SlotName")));
+		if (slot1Type == SlotType::input)
+			slot1 = m->parrent->find(slot1Component)->findInputSlot(slot1Name);
+		else
+			slot1 = m->parrent->find(slot1Component)->findOutputSlot(slot1Name);
+
+
+	Slot * slot2;
+	QString slot2Component = QString::fromStdString(ptree.get<std::string>("Slot2.ComponentName"));
+	QString slot2Name = QString::fromStdString(ptree.get<std::string>("Slot2.SlotName"));
+	SlotType slot2Type = QString::fromStdString(ptree.get<std::string>("Slot2.SlotType")) == "Input"
+		? SlotType::input
+		: SlotType::output;
+
+	if (slot2Component == "__Parent")
+		if (slot2Type == SlotType::input)
+			slot2 = m->parrent->findInputSlot(slot2Name);
+		else
+			slot2 = m->parrent->findOutputSlot(slot2Name);
 	else
-		slot2 = m->parrent->find(
-					QString::fromStdString(ptree.get<std::string>("Slot2.ComponentName")))->
-					findSlot(
-					QString::fromStdString(ptree.get<std::string>("Slot2.SlotName")));
+		if (slot2Type == SlotType::input)
+			slot2 = m->parrent->find(slot2Component)->findInputSlot(slot2Name);
+		else
+			slot2 = m->parrent->find(slot2Component)->findOutputSlot(slot2Name);
 
 	connectSlots(slot1, slot2);
 }
@@ -119,9 +143,10 @@ Slot * Link::slot2() { return m->slot2; }
 
 void Link::connectSlots(Slot * slot1, Slot * slot2)
 {
-
+	if (slot1->vectorized() != slot2->vectorized())
+		KThrow(ModeliaExection, lvl7, "Cannot link a vectorized and a unvectorized type, input type: '" + *slot1->type() + "', output type: '" + *slot2->type() + "'");
 	if (slot1->type() != slot2->type())
-		KThrow(ModeliaExection, lvl7, "Cannot link 2 slot of different type, input type: '" + slot1->type() + "', output type: '" + slot2->type() + "'");
+		KThrow(ModeliaExection, lvl7, "Cannot link 2 slot of different type, input type: '" + *slot1->type() + "', output type: '" + *slot2->type() + "'");
 	if (slot1->owner() == slot2->owner())
 		KThrow(ModeliaExection, lvl7, "Can't link element with itself.");
 

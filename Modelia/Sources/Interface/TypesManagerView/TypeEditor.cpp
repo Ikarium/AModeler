@@ -3,6 +3,8 @@
 #include "Model/TypesManager/TypesLibrary.h"
 #include "Model/TypesManager/Type.h"
 
+#include "TypesLibraryView.h"
+
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -54,6 +56,7 @@ TypeEditor::~TypeEditor()
 
 void TypeEditor::fill()
 {
+	if (!m->currentItem) return;
 
 	QLineEdit* name = new QLineEdit();
 	m->layout->addWidget(new QLabel("Name: "), 1, 0);
@@ -185,7 +188,8 @@ void TypeEditor::fill()
 		QSizePolicy::Ignored, QSizePolicy::Maximum), m->layout->rowCount(), 0);
 }
 
-void TypeEditor::selectionChanged(	
+void TypeEditor::selectionChanged
+(	
 	Model::TypesLibraryItem * selected,
 	Model::TypesLibraryItem * deselected)
 {
@@ -199,9 +203,7 @@ void TypeEditor::nameValidator()
 	QLineEdit* name = dynamic_cast<QLineEdit*>(sender());
 	if (!m->currentItem->parent()->hasChild(name->text()))
 	{
-		App::typesLibrary->startEdit();
 		m->currentItem->setName(name->text());
-		App::typesLibrary->endEdit();
 	}
 	else
 		name->setText(m->currentItem->name());
@@ -213,9 +215,9 @@ void TypeEditor::aliasTypeValidator()
 	Model::Type* newAliasType = App::typesLibrary->find(m->currentItem->type(), lineEdit->text());
 	if (newAliasType)
 		m->currentItem->type()->alias()->type = newAliasType;
-	else
-		lineEdit->setText(App::typesLibrary->getPath(m->currentItem->type()->alias()->type,
-		m->currentItem->type()));
+
+	lineEdit->setText(App::typesLibrary->getPath(m->currentItem->type()->alias()->type,
+	m->currentItem->type()));
 
 }
 
@@ -240,9 +242,8 @@ void TypeEditor::addStructure()
 	typePtree.put("Fields", "");
 	ptree.put_child("Type", typePtree);
 
-	App::typesLibrary->startEdit();
-	m->currentItem->addChild(ptree);
-	App::typesLibrary->endEdit();
+	App::typesLibrary->insertItem(m->currentItem, ptree);
+	App::typesLibraryView->expand(App::typesLibrary->index(m->currentItem));
 }
 
 void TypeEditor::addAlias()
@@ -259,9 +260,8 @@ void TypeEditor::addAlias()
 	typePtree.put("Vectorized", false);
 	ptree.put_child("Type", typePtree);
 
-	App::typesLibrary->startEdit();
-	m->currentItem->addChild(ptree);
-	App::typesLibrary->endEdit();
+	App::typesLibrary->insertItem(m->currentItem, ptree);
+	App::typesLibraryView->expand(App::typesLibrary->index(m->currentItem));
 }
 
 void TypeEditor::addNamesSpace()
@@ -273,9 +273,8 @@ void TypeEditor::addNamesSpace()
 	ptree.put("EditContentPerm", true);
 	ptree.put("Name", m->findName("New_Namespace").toStdString());
 
-	App::typesLibrary->startEdit();
-	m->currentItem->addChild(ptree);
-	App::typesLibrary->endEdit();
+	App::typesLibrary->insertItem(m->currentItem, ptree);
+	App::typesLibraryView->expand(App::typesLibrary->index(m->currentItem));
 }
 
 QString TypeEditor::Impl::findName(QString && name, Model::TypesLibraryItem* parent)
@@ -297,6 +296,8 @@ void TypeEditor::addField()
 {
 	m->currentItem->type()->addField(m->findName("new_field", m->currentItem), 
 		new Model::Field(App::typesLibrary->defaultType()));
+
+	selectionChanged(m->currentItem, m->currentItem);
 }
 
 void TypeEditor::fieldNameValidator()
@@ -306,11 +307,18 @@ void TypeEditor::fieldNameValidator()
 	{
 		QMap<QString, Model::Field*>& fields = m->currentItem->type()->fields();
 		Model::Field* field = fields[sender()->objectName()];
+
 		fields.remove(sender()->objectName());
 		fields.insert(lineEdit->text(), field);
+
+		QList<QWidget *> widgets = m->layout->parentWidget()->findChildren<QWidget *>(sender()->objectName());
+		for (QWidget * widget : widgets)
+				widget->setObjectName(lineEdit->text());
+
 	}
 	else
 		lineEdit->setText(sender()->objectName());
+
 
 }
 
@@ -318,11 +326,12 @@ void TypeEditor::fieldTypeValidator()
 {
 	QLineEdit* lineEdit = dynamic_cast<QLineEdit*>(sender());
 	Model::Type* newType = App::typesLibrary->find(m->currentItem->type(), lineEdit->text());
+	Model::Field * test = m->currentItem->type()->field(sender()->objectName());
 	if (newType)
 		m->currentItem->type()->field(sender()->objectName())->type = newType;
-	else
-		lineEdit->setText(App::typesLibrary->getPath(m->currentItem->type()->field(sender()->objectName())->type,
-			m->currentItem->type()));
+
+	lineEdit->setText(App::typesLibrary->getPath(m->currentItem->type()->field(sender()->objectName())->type,
+		m->currentItem->type()));
 }
 
 void TypeEditor::fieldVectorValidator(int state)

@@ -1,5 +1,6 @@
 #include "VariableView.h"
 
+#include "Model/TypesManager/TypesLibrary.h"
 #include "Model/Model/Components/Variable.h"
 #include <QLineEdit>
 
@@ -78,6 +79,8 @@ void VariableView::fillPropertiesWidget()
 	ui.setupUi(m->variablePropertiesWidget->content());
 	propertiesWidget()->layout()->addWidget(m->variablePropertiesWidget);
 
+	ui.type->setText(m->model->type()->getPath() + (m->model->vectorized() ? "[]" : ""));
+	connect(ui.type, SIGNAL(editingFinished()), this, SLOT(reType()));
 	ui.initialValue->setText(m->model->initialValue());
 	connect(ui.initialValue, SIGNAL(editingFinished()), this, SLOT(updateInitialValue()));
 }
@@ -95,6 +98,29 @@ void VariableView::setInitialValue(QString newValue)
 {
 	m->model->setInitialValue(newValue);
 }
+
+void VariableView::reType()
+{
+	QLineEdit * typeLineEdit = dynamic_cast<QLineEdit *>(sender());
+	QString path = typeLineEdit->text();
+
+	bool vectorized = path.endsWith("[]");
+	if (vectorized)
+		path.chop(2);
+
+	Model::Type* newAliasType = App::typesLibrary->usePath(path);
+	if (newAliasType)
+	{
+		m->model->setType(newAliasType);
+		m->model->setVectorized(vectorized);
+	}
+
+	typeLineEdit->setText(m->model->type()->getPath() + (m->model->vectorized() ? "[]" : ""));
+
+	updateSlots();
+	m->model->updateSlots();
+}
+
 void VariableView::updateInitialValue()
 {
 	setInitialValue(dynamic_cast<QLineEdit *>(sender())->text());

@@ -1,2 +1,16 @@
-Name Root
+FileType Model
 
+TypesLibrary TypesLibraryItem
+{
+
+}
+
+ComponentLibrary ComponentLibraryItem
+{
+
+}
+
+Model Composition
+{
+	Name Root
+}

@@ -30,11 +30,12 @@ public:
 	virtual void fillPropertiesWidget() override;
 	virtual void savePropertyWidget() override;
 
-public slots:
+	public slots:
 	void slotRename();
+	void slotReType();
 	void deleteSlot();
-	Model::Slot * addNewOutput();
-	Model::Slot * addNewInput();
+	Model::Slot * addNewOutput(Model::Type* = nullptr, bool= false);
+	Model::Slot * addNewInput(Model::Type* = nullptr, bool = false, QString = "x");
 
 private:
 	class Impl;

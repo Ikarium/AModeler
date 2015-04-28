@@ -84,13 +84,23 @@ Slot * Component::addOutput(PropertyTree & ptree)
 
 Slot * Component::findSlot(QString name)
 {
+	Slot* result = findInputSlot(name);
+	if (result) return result;
+	return findOutputSlot(name);
+}
+
+Slot * Component::findInputSlot(QString name)
+{
 	for (Slot & current : m->inputs)
 		if (current.name() == name) return &current;
 
+	return nullptr;
+}
+
+Slot * Component::findOutputSlot(QString name)
+{
 	for (Slot & current : m->outputs)
 		if (current.name() == name) return &current;
-
-	qDebug() << "Slot " + name + " not found";
 
 	return nullptr;
 }

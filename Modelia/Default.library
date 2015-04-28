@@ -1,16 +1,18 @@
 FileType Library
-Root LibraryItem
+Root ComponentLibraryItem
 {
 	Name root
 
 	Items
 	{
-		Item LibraryItem
+		Item ComponentLibraryItem
 		{
-			Name Base
+			Name Core
+			Expanded true
+			
 			Items
 			{
-				Item LibraryItem
+				Item ComponentLibraryItem
 				{
 					Name Variable
 					
@@ -19,10 +21,11 @@ Root LibraryItem
 						Name Variable
 						
 						Type Core.Integer
+						Vectorized false
 						
 					}
 				}
-				Item LibraryItem
+				Item ComponentLibraryItem
 				{
 					Name Function
 					
@@ -32,7 +35,7 @@ Root LibraryItem
 						
 					}
 				}
-				Item LibraryItem
+				Item ComponentLibraryItem
 				{
 					Name Composition
 					
@@ -43,14 +46,6 @@ Root LibraryItem
 					}
 				}
 			}
-		}
-		Item LibraryItem
-		{
-			Name Model
-		}
-		Item LibraryItem
-		{
-			Name Library
 		}
 	}
 }

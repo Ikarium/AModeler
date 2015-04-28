@@ -39,6 +39,8 @@ PropertyTrees
 slots accessors
 ***************************/
 	virtual Slot * findSlot(QString);
+	virtual Slot * findInputSlot(QString);
+	virtual Slot * findOutputSlot(QString);
 	void removeSlot(Slot *);
 
 	List<Slot> & inputs();

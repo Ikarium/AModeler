@@ -7,6 +7,9 @@
 #include "Model/Model/Components/Slot.h"
 #include "Model/Model/Components/Link.h"
 
+#include "Model/TypesManager/TypesLibrary.h"
+#include "Model/TypesManager/Type.h"
+
 #include <QFile>
 
 namespace Model
@@ -21,6 +24,10 @@ public:
 	Impl(Compiler *);
 
 	~Impl();
+
+	QString compileLibraryItem(TypesLibraryItem *, uint8 = 0);
+	QString compileNamespace(TypesLibraryItem *, uint8 = 0);
+	QString compileType(Type *, uint8 = 0);
 
 	QString compileFunction(Function *, uint8 = 0);
 	QString compileComposition(Composition *, uint8 = 0);
@@ -53,15 +60,93 @@ QString Compiler::aModelToPhython(Composition * root)
 
 	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream stream(&file);
-	stream << "import os" << endl;
+	stream << "import os" << endl << endl;
 
+	stream << m->compileLibraryItem(App::typesLibrary->root()->child("Model"));
+	stream << endl;
 	stream << m->compileComposition(root);
 
 	file.close();
 
-	system("Python\\Python34\\python.exe Python/model.py & pause");
+	system("Python\\Python32\\python.exe Python/model.py & pause");
 	return "";
 
+}
+
+QString Compiler::Impl::compileLibraryItem(TypesLibraryItem * item, uint8 tabCount)
+{
+	QString result;
+	QTextStream stream(&result);
+
+	if (item->type())
+		stream << compileType(item->type(), tabCount);
+	else
+		stream << compileNamespace(item, tabCount);
+
+	return result;
+}
+
+QString Compiler::Impl::compileNamespace(TypesLibraryItem * item, uint8 tabCount)
+{
+	QString result;
+	QTextStream stream(&result);
+
+	QString tab = "";
+	for (int i = 0; i < tabCount; i++)
+		tab += "\t";
+
+	stream << tab << "class " << item->name() << ":" << endl;
+
+	bool empty = true;
+	for (TypesLibraryItem * subItem : item->children())
+		if (subItem->type())
+		{
+			if (subItem->type()->isStructure())
+			{
+				empty = false;
+				stream << compileType(subItem->type(), tabCount + 1);
+			}
+		}
+		else
+		{
+			empty = false;
+			stream << compileNamespace(subItem, tabCount + 1);
+		}
+
+	if (empty)
+		stream << tab << "\t" << "None" << endl;
+
+	return result;
+}
+
+QString Compiler::Impl::compileType(Type * type, uint8 tabCount)
+{
+	QString result;
+	QTextStream stream(&result);
+
+	QString tab = "";
+	for (int i = 0; i < tabCount; i++)
+		tab += "\t";
+
+	if (type->isStructure())
+	{
+		stream << tab << "class " << type->name() << ":" << endl;
+
+		if (type->fields().count() == 0)
+			stream << tab << "\t" << "None" << endl;
+
+		for (auto field = type->fields().cbegin(); field != type->fields().cend(); ++field)
+			if (field.value()->type->isBaseType())
+				if (field.value()->vectorized)
+					stream << tab << "\t" << field.key() << " = []" << endl;
+				else stream << tab << "\t" << field.key() << " = None" << endl;
+			else if (field.value()->type->isStructure())
+				if (field.value()->vectorized)
+					stream << tab << "\t" << field.key() << " = [" << field.value()->type->name() << "()" << "]" << endl;
+				else stream << tab << "\t" << field.key() << " = " << field.value()->type->name() << "()" << endl;
+	}
+
+	return result;
 }
 
 QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabCount)
@@ -85,8 +170,28 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 	for (Variable* variable : variablesList)
 		if (variable->initialValue() != "")
 			stream << tab << variable->name() + " = " + variable->initialValue() << endl;
-		else
-			stream << tab << variable->name() + " = None" << endl;
+		else if (variable->type()->isBaseType() || variable->type()->isAlias() && variable->type()->alias()->type->isBaseType())
+			if (variable->vectorized())
+				stream << tab << variable->name() + " = []" << endl;
+			else
+				stream << tab << variable->name() + " = None" << endl;
+		else if (variable->type()->isStructure())
+			if (variable->vectorized())
+				stream << tab << variable->name() + " = [" << variable->type()->getPath() << "()" << "]" << endl;
+			else
+				stream << tab << variable->name() + " = " << variable->type()->getPath() << "()" << endl;
+		else if (variable->type()->isAlias())
+			if (variable->type()->alias()->vectorized)
+				if (variable->vectorized())
+					stream << tab << variable->name() + " = [" << variable->type()->alias()->type->getPath() << "()" << "][]" << endl;
+				else
+					stream << tab << variable->name() + " = [" << variable->type()->alias()->type->getPath() << "()" << "]" << endl;
+			else
+				if (variable->vectorized())
+					stream << tab << variable->name() + " = [" << variable->type()->alias()->type->getPath() << "()" << "]" << endl;
+				else
+					stream << tab << variable->name() + " = " << variable->type()->alias()->type->getPath() << "()" << endl;
+
 
 	for (Process* process : processList)
 	{
@@ -103,7 +208,29 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 
 
 		for (Slot& slot : process->outputs())
-			stream << tab << "\t" << slot.name() << " = None" << endl;
+			if (process->findInputSlot(slot.name()) == nullptr)
+				if (slot.type()->isBaseType() || slot.type()->isAlias() && slot.type()->alias()->type->isBaseType())
+					if (slot.vectorized())
+						stream << tab << "\t" << slot.name() << " = []" << endl;
+					else
+						stream << tab << "\t" << slot.name() << " = None" << endl;
+				else if (slot.type()->isStructure())
+					if (slot.vectorized())
+						stream << tab << "\t" << slot.name() << " = [" << slot.type()->getPath() << "()" << "]" << endl;
+					else
+						stream << tab << "\t" << slot.name() << " = " << slot.type()->getPath() << "()" << endl;		
+				else if (slot.type()->isAlias())
+					if (slot.type()->alias()->vectorized)
+						if (slot.vectorized())
+							stream << tab << "\t" << slot.name() + " = [" << slot.type()->alias()->type->getPath() << "()" << "][]" << endl;
+						else
+							stream << tab << "\t" << slot.name() + " = [" << slot.type()->alias()->type->getPath() << "()" << "]" << endl;
+					else
+						if (slot.vectorized())
+							stream << tab << "\t" << slot.name() + " = [" << slot.type()->alias()->type->getPath() << "()" << "]" << endl;
+						else
+							stream << tab << "\t" << slot.name() + " = " << slot.type()->alias()->type->getPath() << "()" << endl;
+
 
 		if (dynamic_cast<Composition*>(process))
 			stream	<< compileComposition(dynamic_cast<Composition*>(process), tabCount + 1)
@@ -185,14 +312,20 @@ QString Compiler::Impl::compileComposition(Composition * composition, uint8 tabC
 	}
 
 	for (Slot& slot : composition->outputs())
-	{
-		stream	<< tab << slot.name()
-				<< " = "
-				<< "var_"
-				<< slot.linkedUniqueSlot()->owner()->name()
-				<< "_"
-				<< slot.linkedUniqueSlot()->name();
-	}
+		if (dynamic_cast<Variable*>(slot.linkedUniqueSlot()->owner()))
+			stream << tab << slot.name()
+			<< " = "
+			<< slot.linkedUniqueSlot()->owner()->name()
+			<< endl;
+		else
+			stream	<< tab << slot.name()
+					<< " = "
+					<< "var_"
+					<< slot.linkedUniqueSlot()->owner()->name()
+					<< "_"
+					<< slot.linkedUniqueSlot()->name()
+					<< endl;
+
 	return result;
 }
 
